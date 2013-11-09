@@ -6,7 +6,7 @@ var spRedirect = function (appname) {
     var reg = new RegExp ('/' + appname);
     var path = pathname.replace (reg, '/' + appname + '/sp');
 
-    var locateurl = protocol + hostname + path;
+    var locateurl = protocol + '//' + hostname + path;
     
     if (navigator.userAgent.indexOf('iPhone') > 0 &&
         navigator.userAgent.indexOf('iPad') == -1 ||
