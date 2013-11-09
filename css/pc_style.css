@@ -1,0 +1,22 @@
+/**
+ * PC用CSS
+ */
+body {
+    background-image:url('../img/hp_bg.jpg');
+    background-repeat:repeat;
+    color: #aaa;
+}
+
+div#descriptions {
+    text-align: center;
+}
+
+h1#title {
+    color: #eee;
+    background-color: #777;
+    padding-left: 2em;
+}
+
+div#enchant-stage {
+    margin: 0 auto;
+}
