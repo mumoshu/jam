@@ -33,6 +33,14 @@ window.onload = function onWindowLoaded () {
                 listButton.height = 346;
                 listButton.y = 500;
 
+                listButton.tl
+                    .hide()
+                    .and()
+                    .scaleTo(0, 0)
+                    .fadeIn(50, enchant.Easing.BOUNCE_EASEOUT)
+                    .and()
+                    .scaleTo(1, 50, enchant.Easing.BOUNCE_EASEOUT);
+
                 listButton.addEventListener('touchstart', function () {
                     app.log(window);
                     app.loadLevel('selectStage', {foo:"bar"});
