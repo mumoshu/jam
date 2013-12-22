@@ -159,11 +159,18 @@ window.onload = function onWindowLoaded () {
         }
     });
 
+    var stageImagePaths = [];
+
+    for (var i=0; i<7; i++) {
+        stageImagePaths.push('img/stage_' + i + '.png');
+    }
+
     var selectStage = new jam.Level({
         name: "selectStage",
         preload: function (context) {
-            // context.game.preload('img/mikoto.png');
-            context.game.preload('img/stage_0.jpg');
+            stageImagePaths.forEach(function (path) {
+               context.game.preload(path);
+            });
         },
         load: function (context, params) {
             var app = context.app;
@@ -217,7 +224,7 @@ window.onload = function onWindowLoaded () {
                 background.opacity = 0.8;
                 background.touchEnabled = true;
                 background.backgroundColor = touchAreaBackgroundColor;
-                background.image = game.assets['img/stage_0.jpg']
+                background.image = game.assets[stageImagePaths[i]];
 
                 var touchArea = new Sprite();
                 touchArea.width = w;
@@ -598,5 +605,5 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(gauges);
     app.registerLevel(getFired);
 
-    app.loadLevel('getFired', { stage: window.assets.stages[0] });
+    app.loadLevel('selectStage', { stage: window.assets.stages[0] });
 };
