@@ -104,9 +104,129 @@ window.onload = function onWindowLoaded () {
         unload: function (context, params) {
         }
     });
-    
+
+    var template = new jam.Level({
+        name: "template",
+        preload: function (context) {
+            // context.game.preload('img/mikoto.png');
+        },
+        load: function (context, params) {
+            // var scene = new Scene();
+            // return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
+    var selectStage = new jam.Level({
+        name: "selectStage",
+        preload: function (context) {
+            // context.game.preload('img/mikoto.png');
+        },
+        load: function (context, params) {
+            var app = context.app;
+
+            var scene = new Scene();
+
+            scene.backgroundColor = "#eeeeee";
+
+            var game = context.game;
+            var w = game.width / 2;
+            var h = game.height / Math.ceil(window.assets.stages.length / 2);
+
+            var colors = ["#56ADFB", "#19436F", "#15141D"];
+
+            window.assets.stages.forEach(function (stage, i) {
+                var components = stage.name.replace("）", "").split("（");
+                var charaName = components[0];
+                var categoryName = components[1];
+
+                var group = new Group();
+                group.width = w;
+                group.height = h;
+                group.x = w * (i % 2);
+                group.y = h * Math.floor(i / 2);
+
+                var charaLabel = new Label(charaName);
+                charaLabel.font = "bold 70px serif";
+                charaLabel.color = "#ffffff";
+                charaLabel.opacity = 0.6;
+                charaLabel.touchEnabled = true;
+
+                var categoryLabel = new Label(categoryName);
+                categoryLabel.font = "30px sans-serif";
+                categoryLabel.color = "#ffffff";
+                categoryLabel.opacity = 0.3;
+                categoryLabel.y = 80;
+                categoryLabel.touchEnabled = true;
+
+                var touchArea = new Sprite();
+                touchArea.width = w;
+                touchArea.height = h;
+                touchArea.opacity = 0.8;
+                touchArea.touchEnabled = true;
+                touchArea.backgroundColor = colors[(i % colors.length)];
+
+                group.addChild(touchArea);
+                group.addChild(charaLabel);
+                group.addChild(categoryLabel);
+
+                group.addEventListener('touchstart', function (e) {
+                    touchArea.backgroundColor = scene.backgroundColor;
+                });
+
+                group.addEventListener('touchend', function (e) {
+                    touchArea.backgroundColor = colors[(i % colors.length)];
+                    var stage = window.assets.stages[i];
+                    app.loadLevel('playStage', { stage: stage })
+                });
+
+                scene.addChild(group);
+            });
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
+    var playStage = new jam.Level({
+        name: "playStage",
+        preload: function (context) {
+            // context.game.preload('img/mikoto.png');
+        },
+        load: function (context, params) {
+            var stage = params.stage;
+
+            var ySkipping = 30;
+
+            var scene = new Scene();
+
+            var label = new Label("プレイ中: " + stage.name);
+            label.font = '30px sans';
+            scene.addChild(label);
+
+            console.log(stage.quizzes);
+
+            stage.quizzes.forEach(function (quiz, i) {
+               var quizLabel = new Label("問題番号:" + i + ", 問題文:" + quiz.text);
+                quizLabel.y = ySkipping * i;
+                scene.addChild(quizLabel);
+            });
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
     app.registerLevel(topLevel);
     app.registerLevel(levelTwo);
-    
-    app.loadLevel('top', { test: 1 });
+    app.registerLevel(selectStage);
+    app.registerLevel(playStage);
+
+    app.loadLevel('selectStage', { test: 1 });
 };
