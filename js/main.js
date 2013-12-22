@@ -43,7 +43,12 @@ window.onload = function onWindowLoaded () {
 
                 listButton.addEventListener('touchstart', function () {
                     app.log(window);
-                    app.loadLevel('selectStage', {foo:"bar"});
+
+                    background.tl
+                        .fadeOut(50)
+                        .then(function () {
+                            app.loadLevel('selectStage', {foo:"bar"});
+                        });
                 });
                 listButton.addEventListener('touchend', function () {
                 });
