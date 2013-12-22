@@ -512,11 +512,79 @@ window.onload = function onWindowLoaded () {
         }
     });
 
+    var finishStage = new jam.Level({
+        name: "finishStage",
+        preload: function (context) {
+            context.game.preload('img/stage_finish.png');
+        },
+        load: function (context, params) {
+            var game = context.game;
+            var app = context.app;
+
+            var scene = new Scene();
+
+            var background = new Sprite();
+            background.image = game.assets['img/stage_finish.png'];
+            background.width = game.width;
+            background.height = game.height;
+
+            background.addEventListener('touchstart', function () {
+                background.tl
+                    .fadeOut(50)
+                    .then(function () {
+                        app.loadLevel('ending');
+                    });
+            });
+
+            scene.addChild(background);
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
+    var ending = new jam.Level({
+        name: "ending",
+        preload: function (context) {
+            context.game.preload('img/ending.png');
+        },
+        load: function (context, params) {
+            var game = context.game;
+            var app = context.app;
+
+            var scene = new Scene();
+
+            var background = new Sprite();
+            background.image = game.assets['img/ending.png'];
+            background.width = game.width;
+            background.height = game.height;
+
+            background.addEventListener('touchstart', function () {
+                background.tl
+                    .fadeOut(50)
+                    .then(function () {
+                        app.loadLevel('top');
+                    });
+            });
+
+            scene.addChild(background);
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
     app.registerLevel(topLevel);
     app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
     app.registerLevel(playStage);
     app.registerLevel(playRoulette);
+    app.registerLevel(finishStage);
+    app.registerLevel(ending);
 
     app.loadLevel('top', { stage: window.assets.stages[0] });
 };
