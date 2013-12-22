@@ -5,13 +5,11 @@ window.onload = function onWindowLoaded () {
     game.fps = 15;
     var logger = new jam.Logger({console: console});
     var app = new jam.Application({game: game, logger: logger});
-
-    // クイズ画面
-    var levelQuiz = new jam.Level({
-        name: 'quiz_template',
+    var topLevel = new jam.Level({
+        name: 'top',
         preload: function (context) {
             context.app.log(context.game);
-            context.app.log('Preloading level...');
+            context.app.log("Preloading topLevel...");
             context.game.preload('img/mikoto.png');
         },
         load: function (context, params) {
@@ -21,11 +19,7 @@ window.onload = function onWindowLoaded () {
             app.log("params=", params, "context=", context);
 
             var scene = (function () {
-
-                var btn_choice0 = new Button('ほげ', 'light');
-                btn_choice0.font = '28px/12px';
-
-/*                var label1 = new Label('ああ' + jam.guid());
+                var label1 = new Label('ああ' + jam.guid());
                 label1.x = 50;
                 label1.y = 100;
                 label1.color = '#ff0000';
@@ -40,11 +34,11 @@ window.onload = function onWindowLoaded () {
                 sprite.addEventListener('touchstart', function () {
                     app.log(window);
                     window.alert("test");
-                    //app.loadLevel('two', {foo:"bar"});
+                    app.loadLevel('two', {foo:"bar"});
                 });
                 sprite.addEventListener('touchend', function () {
                 });
-*/
+
                 // use a Canvas element as a Sprite's drawing element
                 //var sprite2 = new Sprite(64, 64);
                 //var surface = new Surface(320, 320);
@@ -61,7 +55,9 @@ window.onload = function onWindowLoaded () {
                     console.log('touchmove', e);
                 });
 
-                scene.addChild(btn_choice0);
+                scene.addChild(sprite);
+                //scene.addChild(sprite2);
+                scene.addChild(label1);
 
                 return scene;
             })();
@@ -84,17 +80,33 @@ window.onload = function onWindowLoaded () {
             this.onEnterFrame = null;
         }
     });
-    app.registerLevel(levelQuiz);
-    // クイズデータ（ダミー）
-    var quizzes = [
-        { "text": "先輩に呼ばれたときの返事で適切なのは？",
-            "choices": ['はい', 'え？', 'うん', 'なに？'],
-            "correct_choice": 'はい',
-            "correct_choice_index": 0 },
-        { "text": "任された仕事が終わった時、正しいのは？",
-            "choices": ['終わっても報告しない', 'さっさと次の仕事に取り組む', 'すぐに報告する', '同僚に自慢する'],
-            "correct_choice": 'すぐに報告する',
-            "correct_choice_index": 2 },
-    ];
-    app.loadLevel('quiz_template', { test: 1, name: '先輩', quizzes: quizzes });
+
+    var levelTwo = new jam.Level({
+        name: "two",
+        load: function (context, params) {
+            var scene = new Scene();
+            
+            var label = new Label("Level 2: params=" + params);
+            label.x = 32;
+            label.y = 32;
+            
+            var ball = new Sprite(50, 50);
+            var surface = new Surface(50, 50);
+            surface.context.beginPath();
+            surface.context.arc(25, 25, 25, 0, Math.PI*2, true);
+            surface.context.fill();
+            ball.image = surface;
+            
+            scene.addChild(label);
+            scene.addChild(ball);
+            return { scene: scene };
+        },
+        unload: function (context, params) {
+        }
+    });
+    
+    app.registerLevel(topLevel);
+    app.registerLevel(levelTwo);
+    
+    app.loadLevel('top', { test: 1 });
 };
