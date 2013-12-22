@@ -11,6 +11,9 @@ window.onload = function onWindowLoaded () {
             context.app.log(context.game);
             context.app.log("Preloading topLevel...");
             context.game.preload('img/mikoto.png');
+            context.game.preload('img/top_background.png');
+            context.game.preload('img/top_list_button.png');
+            context.game.preload('img/mikoto.png');
         },
         load: function (context, params) {
             var game = context.game;
@@ -19,45 +22,27 @@ window.onload = function onWindowLoaded () {
             app.log("params=", params, "context=", context);
 
             var scene = (function () {
-                var label1 = new Label('ああ' + jam.guid());
-                label1.x = 50;
-                label1.y = 100;
-                label1.color = '#ff0000';
-                label1.font = '12px';
-                label1.opacity = 0.8;
-                label1.text += 'fuga';
+                var background = new Sprite();
+                background.image = game.assets['img/top_background.png'];
+                background.width = game.width;
+                background.height = game.height;
 
-                var sprite = new Sprite(32, 32);
-                sprite.image = game.assets['img/mikoto.png'];
-                sprite.x = 50;
-                sprite.y = 50;
-                sprite.addEventListener('touchstart', function () {
+                var listButton = new Sprite();
+                listButton.image = game.assets['img/top_list_button.png'];
+                listButton.width = 637
+                listButton.height = 346;
+                listButton.y = 500;
+
+                listButton.addEventListener('touchstart', function () {
                     app.log(window);
-                    window.alert("test");
-                    app.loadLevel('two', {foo:"bar"});
+                    app.loadLevel('selectStage', {foo:"bar"});
                 });
-                sprite.addEventListener('touchend', function () {
+                listButton.addEventListener('touchend', function () {
                 });
-
-                // use a Canvas element as a Sprite's drawing element
-                //var sprite2 = new Sprite(64, 64);
-                //var surface = new Surface(320, 320);
-                //sprite2.image = surface;
-                //sprite2.x = 64;
-                //sprite2.y = 128;
 
                 var scene = new Scene();
-                scene.backgroundColor = '#eeeeee';
-                scene.addEventListener('touchstart', function(e) {
-                    console.log('touchstart', e);
-                });
-                scene.addEventListener('touchmove', function(e) {
-                    console.log('touchmove', e);
-                });
-
-                scene.addChild(sprite);
-                //scene.addChild(sprite2);
-                scene.addChild(label1);
+                scene.addChild(background);
+                scene.addChild(listButton);
 
                 return scene;
             })();
@@ -331,5 +316,5 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(playStage);
     app.registerLevel(playRoulette);
 
-    app.loadLevel('playRoulette', { stage: window.assets.stages[0] });
+    app.loadLevel('top', { stage: window.assets.stages[0] });
 };
