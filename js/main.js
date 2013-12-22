@@ -264,11 +264,11 @@ window.onload = function onWindowLoaded () {
                     for (i = 0; i < num; ) {
                         rnd = Math.random() * cnt | 0;
 
-                        c_quizzes.push(quizzes[rnd]);
                         if (history.indexOf(rnd) > -1) {
                             continue;
                         }
 
+                        c_quizzes.push(quizzes[rnd]);
                         history.push(rnd);
                         i++;
                     }
