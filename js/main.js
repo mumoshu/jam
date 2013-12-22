@@ -44,6 +44,14 @@ window.onload = function onWindowLoaded () {
                 listButton.addEventListener('touchstart', function () {
                     app.log(window);
 
+                    listButton.tl
+                        .fadeOut(5)
+                        .fadeIn(5)
+                        .fadeOut(5)
+                        .fadeIn(5)
+                        .fadeOut(5)
+                        .fadeIn(5);
+
                     background.tl
                         .fadeOut(50)
                         .then(function () {
@@ -130,6 +138,13 @@ window.onload = function onWindowLoaded () {
 
             var scene = new Scene();
 
+            var overlay = new Sprite();
+            overlay.backgroundColor = '#eeeeee';
+            overlay.width = game.width;
+            overlay.height = game.height;
+            overlay.opacity = 0;
+            overlay.touchEnabled = false;
+
             scene.backgroundColor = "#eeeeee";
 
             var w = game.width / 2;
@@ -161,12 +176,14 @@ window.onload = function onWindowLoaded () {
                 categoryLabel.y = 80;
                 categoryLabel.touchEnabled = true;
 
+                var touchAreaBackgroundColor = colors[(i % colors.length)];
+
                 var background = new Sprite();
                 background.width = w;
                 background.height = h;
                 background.opacity = 0.8;
                 background.touchEnabled = true;
-                background.backgroundColor = colors[(i % colors.length)];
+                background.backgroundColor = touchAreaBackgroundColor;
                 background.image = game.assets['img/stage_0.jpg']
 
                 var touchArea = new Sprite();
@@ -174,7 +191,7 @@ window.onload = function onWindowLoaded () {
                 touchArea.height = h;
                 touchArea.opacity = 0.8;
                 touchArea.touchEnabled = true;
-                touchArea.backgroundColor = colors[(i % colors.length)];
+                touchArea.backgroundColor = touchAreaBackgroundColor;
 
                 group.addChild(background);
                 group.addChild(touchArea);
@@ -182,16 +199,33 @@ window.onload = function onWindowLoaded () {
                 group.addChild(categoryLabel);
 
                 group.addEventListener('touchstart', function (e) {
-                    touchArea.backgroundColor = scene.backgroundColor;
+                    function flashOn () {
+                        touchArea.backgroundColor = scene.backgroundColor;
+                    }
+                    function flashOff () {
+                        touchArea.backgroundColor = touchAreaBackgroundColor;
+                    }
+                    group.tl
+                        .delay(5).then(flashOn).delay(5).then(flashOff)
+                        .delay(5).then(flashOn).delay(5).then(flashOff)
+                        .delay(5).then(flashOn).delay(5).then(flashOff)
+                        .then(function () {
+                            overlay.tl
+                                .tween({ opacity: 1, time: 30 }, enchant.Easing.EXPO_EASEOUT)
+                                .then(function () {
+                                    touchArea.backgroundColor = colors[(i % colors.length)];
+                                    var stage = window.assets.stages[i];
+                                    app.loadLevel('playStage', { stage: stage })
+
+                                });
+                        });
                 });
 
                 group.addEventListener('touchend', function (e) {
-                    touchArea.backgroundColor = colors[(i % colors.length)];
-                    var stage = window.assets.stages[i];
-                    app.loadLevel('playStage', { stage: stage })
                 });
 
                 scene.addChild(group);
+                scene.addChild(overlay);
             });
 
             return { scene: scene };
