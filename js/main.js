@@ -1,7 +1,7 @@
 window.onload = function onWindowLoaded () {
     enchant();
 
-    var game = new Game(320, 320);
+    var game = new Game(640, 960);
     game.fps = 15;
     var logger = new jam.Logger({console: console});
     var app = new jam.Application({game: game, logger: logger});
