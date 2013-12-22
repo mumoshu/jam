@@ -2,7 +2,7 @@ window.onload = function onWindowLoaded () {
     enchant();
 
     var game = new Game(640, 960);
-    game.fps = 15;
+    game.fps = 60;
     var logger = new jam.Logger({console: console});
     var app = new jam.Application({game: game, logger: logger});
     var topLevel = new jam.Level({
@@ -378,10 +378,103 @@ window.onload = function onWindowLoaded () {
         }
     });
 
+    var playRoulette = new jam.Level({
+        name: "playRoulette",
+        preload: function (context) {
+            context.game.preload('img/roulette.png');
+            context.game.preload('img/stage_roulette.png');
+        },
+        load: function (context, params) {
+            var game = context.game;
+            var app = context.app;
+            var stage = params.stage;
+
+            var scene = new Scene();
+
+            var rotationForce = 5 + Math.random() * 2;
+            var unitTime = 10;
+            var rotationTime = unitTime * rotationForce;
+
+            var background = new Sprite();
+            background.image = game.assets['img/stage_roulette.png'];
+            background.width = game.width;
+            background.height = game.height;
+
+            var roulette = new Sprite();
+            roulette.image = game.assets['img/roulette.png']
+            roulette.width = 203;
+            roulette.height = 199;
+            roulette.scaleX = 2;
+            roulette.scaleY = 2;
+            roulette.x = 200;
+            roulette.y = 330;
+
+            roulette.addEventListener('touchend', function () {
+                roulette.tl.rotateBy(360 * rotationForce, rotationTime);
+                roulette.tl.then(function () {
+                    var earnedLifePoints = Math.floor(Math.random() * 1.9999 + 1);
+
+                    var scoreBackground = new Sprite();
+                    scoreBackground.backgroundColor = "#666666";
+                    scoreBackground.opacity = 0.8;
+                    scoreBackground.width = game.width;
+                    scoreBackground.height = game.height;
+
+                    var scoreX = 100;
+                    var scoreY = 500;
+                    var scoreColor = '#66ee66';
+
+                    var scoreDisplay = new Label("+ " + earnedLifePoints);
+                    scoreDisplay.font = 'bold 150px sans'
+                    scoreDisplay.color = scoreColor;
+                    scoreDisplay.x = scoreX;
+                    scoreDisplay.y = scoreY;
+
+                    var scoreSuffix = new Label("コビ");
+                    scoreSuffix.font = 'bold 50px sans';
+                    scoreSuffix.color = scoreColor;
+                    scoreSuffix.x = scoreX + 250;
+                    scoreSuffix.y = scoreY + 90;
+
+                    var group = new Group();
+                    group.addChild(scoreBackground);
+                    group.addChild(scoreDisplay);
+                    group.addChild(scoreSuffix);
+
+                    scene.addChild(group);
+
+                    roulette.tl.delay(100);
+                    roulette.tl.then(function () {
+                        app.loadLevel('playStage', { stage: stage });
+                    });
+                });
+            });
+
+            this.enterFrame = function () {
+                ticks ++;
+                if (ticks % 100 == 0) {
+                    console.log(ticks);
+                }
+            }
+
+            var ticks = 0;
+            game.addEventListener('enterframe', this.enterFrame);
+
+            scene.addChild(background);
+            scene.addChild(roulette);
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+            context.game.removeEventListener('enterframe', this.enterFrame);
+        }
+    });
+
     app.registerLevel(topLevel);
     app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
     app.registerLevel(playStage);
+    app.registerLevel(playRoulette);
 
-    app.loadLevel('selectStage', { test: 1 });
+    app.loadLevel('playRoulette', { stage: window.assets.stages[0] });
 };
