@@ -123,15 +123,16 @@ window.onload = function onWindowLoaded () {
         name: "selectStage",
         preload: function (context) {
             // context.game.preload('img/mikoto.png');
+            context.game.preload('img/stage_0.jpg');
         },
         load: function (context, params) {
             var app = context.app;
+            var game = context.game;
 
             var scene = new Scene();
 
             scene.backgroundColor = "#eeeeee";
 
-            var game = context.game;
             var w = game.width / 2;
             var h = game.height / Math.ceil(window.assets.stages.length / 2);
 
@@ -161,6 +162,14 @@ window.onload = function onWindowLoaded () {
                 categoryLabel.y = 80;
                 categoryLabel.touchEnabled = true;
 
+                var background = new Sprite();
+                background.width = w;
+                background.height = h;
+                background.opacity = 0.8;
+                background.touchEnabled = true;
+                background.backgroundColor = colors[(i % colors.length)];
+                background.image = game.assets['img/stage_0.jpg']
+
                 var touchArea = new Sprite();
                 touchArea.width = w;
                 touchArea.height = h;
@@ -168,6 +177,7 @@ window.onload = function onWindowLoaded () {
                 touchArea.touchEnabled = true;
                 touchArea.backgroundColor = colors[(i % colors.length)];
 
+                group.addChild(background);
                 group.addChild(touchArea);
                 group.addChild(charaLabel);
                 group.addChild(categoryLabel);
@@ -247,12 +257,12 @@ window.onload = function onWindowLoaded () {
 
             var roulette = new Sprite();
             roulette.image = game.assets['img/roulette.png']
-            roulette.width = 203;
-            roulette.height = 199;
-            roulette.scaleX = 2;
-            roulette.scaleY = 2;
-            roulette.x = 200;
-            roulette.y = 330;
+            roulette.width = 300;
+            roulette.height = 300;
+            roulette.scaleX = 1.5;
+            roulette.scaleY = 1.5;
+            roulette.x = 170;
+            roulette.y = 300;
 
             roulette.addEventListener('touchend', function () {
                 roulette.tl.rotateBy(360 * rotationForce, rotationTime);
