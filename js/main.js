@@ -255,7 +255,14 @@ window.onload = function onWindowLoaded () {
                                 .then(function () {
                                     touchArea.backgroundColor = colors[(i % colors.length)];
                                     var stage = window.assets.stages[i];
-                                    app.loadLevel('playStage', { stage: stage })
+                                    var stageWithImagePath = {};
+                                    for (var name in stage) {
+                                        if (stage.hasOwnProperty(name)) {
+                                            stageWithImagePath[name] = stage[name];
+                                        }
+                                    }
+                                    stageWithImagePath.imagePath = stageImagePaths[i];
+                                    app.loadLevel('prologue', { stage: stageWithImagePath })
 
                                 });
                         });
@@ -266,6 +273,139 @@ window.onload = function onWindowLoaded () {
 
                 scene.addChild(group);
                 scene.addChild(overlay);
+            });
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
+    var prologue = new jam.Level({
+        name: "prologue",
+        preload: function (context) {
+            context.game.preload('img/prologue_dialogue_box.png');
+        },
+        load: function (context, params) {
+
+            function wrapText(context, text, x, y, maxWidth, lineHeight, rightMargin) {
+                var cars = text.split("\n");
+
+                for (var ii = 0; ii < cars.length; ii++) {
+
+                    var line = "";
+                    var words = cars[ii].split("");
+
+                    for (var n = 0; n < words.length; n++) {
+                        var testLine = line + words[n];
+                        var metrics = context.measureText(testLine);
+                        var testWidth = metrics.width;
+
+                        if (testWidth > maxWidth - rightMargin) {
+                            context.fillText(line, x, y);
+                            line = words[n];
+                            y += lineHeight;
+                        }
+                        else {
+                            line = testLine;
+                        }
+                    }
+
+                    context.fillText(line, x, y);
+                    y += lineHeight;
+                }
+            }
+
+            var game = context.game;
+            var app = context.app;
+            var stage = params.stage;
+
+            var scene = new Scene();
+
+            var sceneBackground = new Sprite();
+            sceneBackground.image = game.assets[stage.imagePath];
+            sceneBackground.width = game.width;
+            sceneBackground.height = game.height;
+
+            var dialogueBoxBackground = new Sprite();
+            dialogueBoxBackground.image = game.assets['img/prologue_dialogue_box.png'];
+            dialogueBoxBackground.width = 428;
+            dialogueBoxBackground.height = 340;
+            dialogueBoxBackground.opacity = 0.9;
+
+            var dialogueBox = new Group();
+            dialogueBox.x = (game.width - dialogueBoxBackground.width) / 2;
+            dialogueBox.y = 400;
+            dialogueBox.width = 428;
+            dialogueBox.height = 340;
+            dialogueBox.scaleX = 1.0;
+            dialogueBox.scaley = 1.0;
+
+            var messageLabelPadding = 30;
+            var messageLabelWidth = dialogueBox.width - (messageLabelPadding * 2);
+            var messageLabelHeight = dialogueBox.height - (messageLabelPadding * 2);
+
+            var messageLabelSurface = new Surface(messageLabelWidth, messageLabelHeight);
+            messageLabelSurface.width = messageLabelWidth;
+            messageLabelSurface.height = messageLabelHeight;
+            messageLabelSurface.context.font = "bold 30pt sans-serif";
+            messageLabelSurface.context.textBaseline = "top";
+
+            var i = 0;
+            var interval = window.setInterval(function () {
+                if (i >= stage.prologueNarration.length) {
+                    window.clearInterval(interval);
+
+                    messageLabel.tl
+                        .delay(100)
+                        .fadeOut(100);
+                    dialogueBoxBackground.tl
+                        .delay(100)
+                        .fadeOut(100);
+                    sceneBackground.tl
+                        .delay(100)
+                        .fadeOut(100)
+                        .then(function () {
+                            app.loadLevel('playStage', { stage: stage });
+                        });
+
+                    return;
+                }
+                messageLabelSurface.context.clearRect(0, 0, messageLabelWidth, messageLabelHeight);
+                messageLabelSurface.context.fillStyle = "#eeeeee";
+                wrapText(
+                    messageLabelSurface.context,
+                    stage.prologueNarration[i],
+                    messageLabelPadding + 20,
+                    messageLabelPadding + 20,
+                    messageLabelWidth,
+                    50,
+                    20
+                );
+                messageLabel.tl
+                    .moveBy(0, 2 * i, 5)
+                    .moveBy(0, - 4 * i, 5)
+                    .moveBy(0, 4 * i, 5)
+                    .moveBy(0, - 2 * i, 5)
+
+                i++;
+            }, 800);
+
+
+            var messageLabel = new Sprite();
+            messageLabel.width = messageLabelWidth;
+            messageLabel.height = messageLabelHeight;
+            messageLabel.image = messageLabelSurface;
+
+            dialogueBox.addChild(dialogueBoxBackground);
+            dialogueBox.addChild(messageLabel);
+
+            scene.addChild(sceneBackground);
+            scene.addChild(dialogueBox);
+
+            scene.addEventListener('touchstart', function () {
+                app.loadLevel('playStage', { stage: stage });
             });
 
             return { scene: scene };
@@ -757,6 +897,7 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(topLevel);
     app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
+    app.registerLevel(prologue);
     app.registerLevel(playStage);
     app.registerLevel(playRoulette);
     app.registerLevel(finishStage);
