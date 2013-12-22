@@ -330,7 +330,9 @@ window.onload = function onWindowLoaded () {
                     size: [280, 110],
                     font: '32px/48px serif',
                 };
-                var stage_quizzes = params.stage.quizzes;
+
+                var stage = params.stage;
+                var stage_quizzes = stage.quizzes;
                 var quizzes;
 
                 // クイズデータを無作為に作成
@@ -388,6 +390,9 @@ window.onload = function onWindowLoaded () {
                     btn_kobi.width = 150;
                     btn_kobi.height = 150;
                     btn_kobi.moveTo(455, 505);
+                    btn_kobi.addEventListener('touchstart', function () {
+                        app.loadLevel('playRoulette', { stage: stage });
+                    });
 
                     for ( i = 0; i < 4; i++ ) {
                         var btn = new Button('select'+i, 'light');
