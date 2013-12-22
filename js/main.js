@@ -372,16 +372,6 @@ window.onload = function onWindowLoaded () {
                 return scene;
             })();
 
-            var frameCount = 0;
-            this.onEnterFrame = function () {
-                frameCount ++;
-
-                if (frameCount % 100 == 0) {
-                    context.app.log(frameCount + " frames has passed until now.");
-                }
-            };
-            game.addEventListener('enterframe', this.onEnterFrame);
-
             return { scene: scene };
         },
         unload: function (context) {
