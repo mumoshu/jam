@@ -1,3 +1,37 @@
+var controller = (function () {
+    function Module() {}
+
+    var controller = new Module();
+
+    controller.GaugeController = (function () {
+        function GaugeController(args) {
+            this.group = args.group;
+            this.sprites = args.sprites;
+        }
+        GaugeController.prototype.setValue = function (value) {
+            this.value = value;
+            if (this.group.firstChild != null) {
+                this.group.removeChild(this.group.firstChild);
+            }
+            this.group.addChild(this.sprites[value]);
+        };
+        GaugeController.prototype.getValue = function () {
+            return this.value;
+        };
+        GaugeController.prototype.setRandom = function () {
+            var value = Math.floor(Math.random() * this.sprites.length);
+            this.setValue(value);
+        };
+        GaugeController.getMaxValue = function () {
+            return this.sprites.length;
+        };
+
+        return GaugeController;
+    })();
+
+    return controller;
+})();
+
 window.onload = function onWindowLoaded () {
     enchant();
 
@@ -423,6 +457,83 @@ window.onload = function onWindowLoaded () {
         }
     });
 
+    var timeImagePaths = [];
+    var lifeImagePaths = [];
+
+    for (var i=0; i<6; i++) {
+        lifeImagePaths.push('img/life_' + i + '.png');
+    }
+    for (var i=0; i<9; i++) {
+        timeImagePaths.push('img/time_' + i + '.png');
+    }
+
+    var gauges = new jam.Level({
+        name: "gauges",
+        preload: function (context) {
+            lifeImagePaths.forEach(function (path) {
+               context.game.preload(path);
+            });
+            timeImagePaths.forEach(function (path) {
+                context.game.preload(path);
+            });
+        },
+        load: function (context, params) {
+            var game = context.game;
+            var app = context.app;
+
+            var scene = new Scene();
+
+            var lifeSprites = [];
+            var timeSprites = [];
+
+            lifeImagePaths.forEach(function (path) {
+                var lifeSprite = new Sprite();
+                lifeSprite.image = game.assets[path];
+                lifeSprite.width = 179;
+                lifeSprite.height = 334;
+                lifeSprites.push(lifeSprite);
+            });
+            timeImagePaths.forEach(function (path) {
+                var timeSprite = new Sprite();
+                timeSprite.image = game.assets[path];
+                timeSprite.width = 814;
+                timeSprite.height = 209;
+                timeSprites.push(timeSprite);
+            });
+
+            var lifeGroup = new Group();
+            lifeGroup.width = game.width;
+            lifeGroup.height = game.height;
+
+            var timeGroup = new Group();
+            timeGroup.width = game.width;
+            timeGroup.height = game.height;
+
+            var lifeController = new controller.GaugeController({group: lifeGroup, sprites: lifeSprites});
+            var timeController = new controller.GaugeController({group: timeGroup, sprites: timeSprites});
+
+            var elapsedFrame = 0;
+            this.enterFrame = function () {
+                if (elapsedFrame % 30 == 0) {
+                    lifeController.setRandom();
+                    timeController.setRandom();
+                }
+                elapsedFrame ++;
+            };
+
+            game.addEventListener('enterframe', this.enterFrame);
+
+            scene.addChild(lifeGroup);
+            scene.addChild(timeGroup);
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+            context.game.removeEventListener(this.enterFrame);
+            window.clearInterval(this.interval);
+        }
+    });
+
     app.registerLevel(topLevel);
     app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
@@ -430,6 +541,7 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(playRoulette);
     app.registerLevel(finishStage);
     app.registerLevel(ending);
+    app.registerLevel(gauges);
 
-    app.loadLevel('top', { stage: window.assets.stages[0] });
+    app.loadLevel('gauges', { stage: window.assets.stages[0] });
 };
