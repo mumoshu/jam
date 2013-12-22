@@ -689,6 +689,60 @@ window.onload = function onWindowLoaded () {
         }
     });
 
+    var getFired = new jam.Level({
+        name: "getFired",
+        preload: function (context) {
+            context.game.preload('img/get_fired.png');
+        },
+        load: function (context, params) {
+            var game = context.game;
+            var app = context.app;
+
+            var scene = new Scene();
+
+            var background = new Sprite();
+            background.image = game.assets['img/get_fired.png'];
+            background.width = game.width;
+            background.height = game.height;
+
+            var speech = new Label("お前はクビだ！");
+            speech.y = 640;
+            speech.width = 640;
+            speech.height = 320;
+            speech.textAlign = 'center';
+            speech.font = "bold 60pt sans";
+            speech.color = "#ff0000";
+
+            speech.tl
+                .scaleTo(8, 8)
+                .scaleTo(1, 1, 6)
+                .rotateBy(10, 5)
+                .rotateBy(-20, 5)
+                .rotateBy(10, 5);
+
+            background.tl
+                .rotateBy(20, 5)
+                .rotateBy(-40, 5)
+                .rotateBy(20, 5);
+
+            background.addEventListener('touchstart', function () {
+                background.tl
+                    .fadeOut(200)
+                    .then(function () {
+                        app.loadLevel('top', {});
+                    });
+            });
+
+            scene.addChild(background);
+            scene.addChild(speech);
+
+            return { scene: scene };
+        },
+        unload: function (context) {
+
+        }
+    });
+
     app.registerLevel(topLevel);
     app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
@@ -697,6 +751,7 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(finishStage);
     app.registerLevel(ending);
     app.registerLevel(gauges);
+    app.registerLevel(getFired);
 
-    app.loadLevel('gauges', { stage: window.assets.stages[0] });
+    app.loadLevel('getFired', { stage: window.assets.stages[0] });
 };
