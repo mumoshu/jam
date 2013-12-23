@@ -465,6 +465,19 @@ window.onload = function onWindowLoaded () {
             height: 161
         }
     ];
+    
+    var blameImages = [
+        {
+            path: 'img/blame_0.png',
+            width: 106,
+            height: 484
+        },
+        {
+            path: 'img/blame_1.png',
+            width: 379,
+            height: 204
+        }
+    ];
 
     // クイズ画面
     var playStage = new jam.Level({
@@ -477,7 +490,11 @@ window.onload = function onWindowLoaded () {
             context.game.preload('img/quiz_choice_box.png');
             context.game.preload('img/quiz_text_box.png');
             context.game.preload('img/praise_character.png');
+            context.game.preload('img/blame_character.png');
             praiseImages.forEach(function (image) {
+                context.game.preload(image.path);
+            });
+            blameImages.forEach(function (image) {
                 context.game.preload(image.path);
             });
         },
@@ -610,80 +627,172 @@ window.onload = function onWindowLoaded () {
                 return rouletteButton;
             })();
 
-            var praiseSprites = [];
-            praiseImages.forEach(function (image) {
-                var sprite = new Sprite();
-                sprite.image = game.assets[image.path];
-                sprite.width = image.width;
-                sprite.height = image.height;
-                praiseSprites.push(sprite);
-            });
+            var praiseController = (function () {
+                var praiseController = {};
 
-            var praiseCharacterSprite = new Sprite();
-            praiseCharacterSprite.image = game.assets['img/praise_character.png'];
-            praiseCharacterSprite.width = 640;
-            praiseCharacterSprite.height = 960;
+                var praiseSprites = [];
+                praiseImages.forEach(function (image) {
+                    var sprite = new Sprite();
+                    sprite.image = game.assets[image.path];
+                    sprite.width = image.width;
+                    sprite.height = image.height;
+                    praiseSprites.push(sprite);
+                });
 
-            var praiseBackground = new Sprite();
-            praiseBackground.width = 640;
-            praiseBackground.height = 960;
-            praiseBackground.backgroundColor = '#eeeeee';
-            praiseBackground.opacity = 0.5;
+                var praiseCharacterSprite = new Sprite();
+                praiseCharacterSprite.image = game.assets['img/praise_character.png'];
+                praiseCharacterSprite.width = 640;
+                praiseCharacterSprite.height = 960;
 
-            var praiseGroup = new Group();
-            praiseGroup.width = 640;
-            praiseGroup.height = 960;
+                var praiseBackground = new Sprite();
+                praiseBackground.width = 640;
+                praiseBackground.height = 960;
+                praiseBackground.backgroundColor = '#eeeeee';
+                praiseBackground.opacity = 0.5;
 
-            praiseGroup.addChild(praiseBackground);
-            praiseGroup.addChild(praiseCharacterSprite);
-            praiseGroup.addChild(praiseSprites[0]);
-            praiseGroup.addChild(praiseSprites[1]);
-            praiseGroup.addChild(praiseSprites[2]);
+                var praiseGroup = new Group();
+                praiseGroup.width = 640;
+                praiseGroup.height = 960;
 
-            praiseBackground.tl
-                .fadeOut(0);
-            praiseCharacterSprite.tl
-                .fadeOut(0);
-            praiseImages.forEach(function(image, i) {
-                praiseSprites[i].tl
+                praiseGroup.addChild(praiseBackground);
+                praiseGroup.addChild(praiseCharacterSprite);
+                praiseGroup.addChild(praiseSprites[0]);
+                praiseGroup.addChild(praiseSprites[1]);
+                praiseGroup.addChild(praiseSprites[2]);
+
+                praiseBackground.tl
                     .fadeOut(0);
-            });
-
-            var currentPraiseSpriteIndex;
-
-            function showPraise(callback) {
-                scene.addChild(praiseGroup);
-                currentPraiseSpriteIndex = Math.floor(Math.random() * praiseImages.length);
-                var delay = 30;
-                var animationTime = 5;
-                praiseBackground.tl
-                    .delay(delay)
-                    .fadeIn(animationTime);
                 praiseCharacterSprite.tl
-                    .delay(delay)
-                    .fadeIn(animationTime);
-                praiseSprites[currentPraiseSpriteIndex].tl
-                    .delay(delay)
-                    .fadeIn(animationTime)
-                    .then(callback);
-            }
+                    .fadeOut(0);
+                praiseImages.forEach(function(image, i) {
+                    praiseSprites[i].tl
+                        .fadeOut(0);
+                });
 
-            function hidePraise(callback) {
-                var animationTime = 30;
-                praiseBackground.tl
-                    .fadeOut(animationTime)
-                    .hide();
-                praiseCharacterSprite.tl
-                    .fadeOut(animationTime)
-                    .hide();
-                praiseSprites[currentPraiseSpriteIndex].tl
-                    .fadeOut(animationTime)
-                    .then(function () {
-                        scene.removeChild(praiseGroup);
-                    })
-                    .hide()
-                    .then(callback);
-            }
+                var currentPraiseSpriteIndex;
+
+                function showPraise(callback) {
+                    scene.addChild(praiseGroup);
+                    currentPraiseSpriteIndex = Math.floor(Math.random() * praiseImages.length);
+                    var delay = 30;
+                    var animationTime = 5;
+                    praiseBackground.tl
+                        .delay(delay)
+                        .fadeIn(animationTime);
+                    praiseCharacterSprite.tl
+                        .delay(delay)
+                        .fadeIn(animationTime);
+                    praiseSprites[currentPraiseSpriteIndex].tl
+                        .delay(delay)
+                        .fadeIn(animationTime)
+                        .then(callback);
+                }
+
+                function hidePraise(callback) {
+                    var animationTime = 30;
+                    praiseBackground.tl
+                        .fadeOut(animationTime)
+                        .hide();
+                    praiseCharacterSprite.tl
+                        .fadeOut(animationTime)
+                        .hide();
+                    praiseSprites[currentPraiseSpriteIndex].tl
+                        .fadeOut(animationTime)
+                        .then(function () {
+                            scene.removeChild(praiseGroup);
+                        })
+                        .hide()
+                        .then(callback);
+                }
+
+                praiseController.showPraise = showPraise;
+                praiseController.hidePraise = hidePraise;
+
+                return praiseController;
+            })();
+
+            var blameController = (function () {
+                var blameController = {};
+
+                var blameSprites = [];
+                blameImages.forEach(function (image) {
+                    var sprite = new Sprite();
+                    sprite.image = game.assets[image.path];
+                    sprite.width = image.width;
+                    sprite.height = image.height;
+                    blameSprites.push(sprite);
+                });
+
+                var blameCharacterSprite = new Sprite();
+                blameCharacterSprite.image = game.assets['img/blame_character.png'];
+                blameCharacterSprite.width = 640;
+                blameCharacterSprite.height = 960;
+
+                var blameBackground = new Sprite();
+                blameBackground.width = 640;
+                blameBackground.height = 960;
+                blameBackground.backgroundColor = '#eeeeee';
+                blameBackground.opacity = 0.5;
+
+                var blameGroup = new Group();
+                blameGroup.width = 640;
+                blameGroup.height = 960;
+
+                blameGroup.addChild(blameBackground);
+                blameGroup.addChild(blameCharacterSprite);
+                blameGroup.addChild(blameSprites[0]);
+                blameGroup.addChild(blameSprites[1]);
+
+                blameBackground.tl
+                    .fadeOut(0);
+                blameCharacterSprite.tl
+                    .fadeOut(0);
+                blameImages.forEach(function(image, i) {
+                    blameSprites[i].tl
+                        .fadeOut(0);
+                });
+
+                var currentblameSpriteIndex;
+
+                function showBlame(callback) {
+                    scene.addChild(blameGroup);
+                    currentblameSpriteIndex = Math.floor(Math.random() * blameImages.length);
+                    var delay = 30;
+                    var animationTime = 5;
+                    blameBackground.tl
+                        .delay(delay)
+                        .fadeIn(animationTime);
+                    blameCharacterSprite.tl
+                        .delay(delay)
+                        .fadeIn(animationTime);
+                    blameSprites[currentblameSpriteIndex].tl
+                        .delay(delay)
+                        .fadeIn(animationTime)
+                        .then(callback);
+                }
+
+                function hideBlame(callback) {
+                    var animationTime = 30;
+                    blameBackground.tl
+                        .fadeOut(animationTime)
+                        .hide();
+                    blameCharacterSprite.tl
+                        .fadeOut(animationTime)
+                        .hide();
+                    blameSprites[currentblameSpriteIndex].tl
+                        .fadeOut(animationTime)
+                        .then(function () {
+                            scene.removeChild(blameGroup);
+                        })
+                        .hide()
+                        .then(callback);
+                }
+
+                blameController.showBlame = showBlame;
+                blameController.hideBlame = hideBlame;
+
+                return blameController;
+            })();
 
             // クイズデータを無作為に作成
             var choiceQuizzes = function (quizzes, num) {
@@ -732,14 +841,14 @@ window.onload = function onWindowLoaded () {
                 var judge = is_correct ? '正解' : '不正解';
 
                 if (is_correct) {
-                    showPraise(function () {
-                        hidePraise(function () {
+                    praiseController.showPraise(function () {
+                        praiseController.hidePraise(function () {
                             fetchNext();
                         })
                     });
                 } else {
-                    showPraise(function () {
-                        hidePraise(function () {
+                    blameController.showBlame(function () {
+                        blameController.hideBlame(function () {
                             fetchNext();
                         })
                     });
@@ -1207,5 +1316,5 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(gauges);
     app.registerLevel(getFired);
 
-    app.loadLevel('top', { stage: window.assets.stages[0] });
+    app.loadLevel('playStage', { stage: window.assets.stages[0] });
 };
