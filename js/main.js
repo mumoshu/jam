@@ -457,6 +457,7 @@ window.onload = function onWindowLoaded () {
             context.game.preload('img/roulette_button.png');
             context.game.preload('img/roulette_button_pressed.png');
             context.game.preload('img/quiz_choice_box.png');
+            context.game.preload('img/quiz_text_box.png');
         },
         load: function (context, params) {
             var app = context.app;
@@ -487,12 +488,38 @@ window.onload = function onWindowLoaded () {
             sceneBackground.width = game.width;
             sceneBackground.height = game.height;
 
+            var quizTextBoxPadding = 30;
+            var quizTextBoxWidth = 640 - (quizTextBoxPadding * 2);
+            var quizTextBoxHeight = 155;
+            var quizTextBoxLabelPadding = 5;
+            var quizTextBoxLabelRightMargin = 50;
+
             var l_quiz = new Label();
-            l_quiz.backgroundColor = '#FFFFFF';
-            l_quiz.width = 420;
-            l_quiz.height = 155;
+//            l_quiz.backgroundColor = '#FFFFFF';
+            l_quiz.x = quizTextBoxPadding + quizTextBoxLabelPadding
+            l_quiz.y = quizTextBoxPadding + quizTextBoxLabelPadding;
+            l_quiz.width = quizTextBoxWidth - quizTextBoxPadding - quizTextBoxLabelPadding - quizTextBoxLabelRightMargin;
+            l_quiz.height = quizTextBoxHeight - quizTextBoxPadding - quizTextBoxLabelPadding;
             l_quiz.font = '32px serif';
-            l_quiz.moveTo(18, 505);
+
+            var quizTextBox = new Group();
+            quizTextBox.width = quizTextBoxWidth;
+            quizTextBox.height = quizTextBoxHeight;
+            quizTextBox.moveTo(18, 505);
+
+            var quizTextBoxImageWidth = 581.0;
+            var quizTextBoxImageHeight = 253.0;
+            var quizTextBoxBackground = new Sprite();
+            quizTextBoxBackground.image = game.assets['img/quiz_text_box.png'];
+            quizTextBoxBackground.width = quizTextBoxImageWidth;
+            quizTextBoxBackground.height = quizTextBoxImageHeight;
+            quizTextBoxBackground.originX = 0;
+            quizTextBoxBackground.originY = 0;
+            quizTextBoxBackground.scaleX = 1 / (quizTextBoxImageWidth / quizTextBoxWidth);
+            quizTextBoxBackground.scaleY = 1 / (quizTextBoxImageHeight / quizTextBoxHeight);
+
+            quizTextBox.addChild(quizTextBoxBackground);
+            quizTextBox.addChild(l_quiz);
 
             var btn_choice = {
                 list: [],
@@ -502,7 +529,7 @@ window.onload = function onWindowLoaded () {
 
             var rouletteButton = (function() {
                 var rouletteButtonX = 450;
-                var rouletteButtonY = 510;
+                var rouletteButtonY = 100;
                 var rouletteButtonWidth = 120;
                 var rouletteButtonHeight = 120;
                 var rouletteButtonScale = 1.5;
@@ -673,7 +700,7 @@ window.onload = function onWindowLoaded () {
                 }
 
                 scene.addChild(sceneBackground);
-                scene.addChild(l_quiz);
+                scene.addChild(quizTextBox);
                 scene.addChild(rouletteButton);
                 btn_choice.list.forEach(function (btn) {
                     scene.addChild(btn);
