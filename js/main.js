@@ -411,7 +411,6 @@ window.onload = function onWindowLoaded () {
             return { scene: scene };
         },
         unload: function (context) {
-
         }
     });
 
@@ -429,10 +428,8 @@ window.onload = function onWindowLoaded () {
             var game = context.game;
             var stage = params.stage;
 
-            var quizzes;
             var num = 10;
             var pointer = 0;
-            var scene = new Scene();
             var pos_list = [
                 [ 15, 720 ],
                 [ 325, 720 ],
@@ -444,8 +441,10 @@ window.onload = function onWindowLoaded () {
                 index: null,
             };
 
+            var quizzes;
             var stage_quizzes = stage.quizzes;
 
+            var scene = new Scene();
             var sceneBackground = new Sprite();
             sceneBackground.image = game.assets[stage.imagePath];
             sceneBackground.width = game.width;
@@ -468,8 +467,9 @@ window.onload = function onWindowLoaded () {
             btn_kobi.width = 150;
             btn_kobi.height = 150;
             btn_kobi.moveTo(455, 505);
-                btn_kobi.addEventListener('touchstart', function () {
-                app.loadLevel('playRoulette', { stage: stage });
+            btn_kobi.addEventListener('touchstart', function () {
+                // 現在の状況を渡す
+                app.loadLevel('playRoulette', { stage: stage, obj: { quizzes: quizzes, pointer: pointer } });
             });
 
             // クイズデータを無作為に作成
@@ -507,8 +507,9 @@ window.onload = function onWindowLoaded () {
 
             // 選択を判定
             var judgeChoice = function(index) {
-                app.log('choiced: ' + index);
-                app.log(' text: ' + quizzes[pointer].text);
+                app.log('text: ' + quizzes[pointer].text);
+                app.log(' index: ' + index);
+                app.log(' choice: ' + quizzes[pointer].choices[index]);
                 app.log(' answer: ' + quizzes[pointer].correct_choice);
                 showJudgeResult(quizzes[pointer].correct_choice_index == index);
             };
@@ -516,7 +517,6 @@ window.onload = function onWindowLoaded () {
             // 結果を表示
             var showJudgeResult = function(is_correct) {
                 var judge = is_correct ? '正解' : '不正解';
-                app.log(judge);
 
                 fetchNext();
             };
@@ -533,7 +533,7 @@ window.onload = function onWindowLoaded () {
                     return ;
                 }
 
-                app.loadLevel('selectStage', {});
+                app.loadLevel('selectStage', { stage: stage });
             };
 
             var scene = (function () {
@@ -544,9 +544,9 @@ window.onload = function onWindowLoaded () {
                     btn.font = btn_choice.font;
                     btn.width = btn_choice.size[0];
                     btn.height = btn_choice.size[1];
-                    btn.ontouchend = function(evt) {
+                    btn.addEventListener('touchend', function(evt) {
                         judgeChoice(evt.target.index);
-                    }
+                    });
 
                     btn.moveTo(pos_list[i][0], pos_list[i][1]);
                     btn_choice.list.push(btn);
@@ -562,7 +562,13 @@ window.onload = function onWindowLoaded () {
                 return scene;
             })();
 
-            quizzes = choiceQuizzes(stage_quizzes, num);
+            if (params.fromRoulette) {
+                quizzes = params.obj.quizzes;
+                pointer = params.obj.pointer;
+            } else {
+                quizzes = choiceQuizzes(stage_quizzes, num);
+            }
+
             loadQuiz(quizzes[pointer]);
             return { scene: scene };
         },
@@ -637,7 +643,7 @@ window.onload = function onWindowLoaded () {
 
                     roulette.tl.delay(100);
                     roulette.tl.then(function () {
-                        app.loadLevel('playStage', { stage: stage });
+                        app.loadLevel('playStage', { stage: stage, obj: params.obj, fromRoulette: true });
                     });
                 });
             });
