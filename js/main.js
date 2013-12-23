@@ -32,13 +32,38 @@ var controller = (function () {
     return controller;
 })();
 
+var model = (function () {
+    function Module() {}
+
+    var model = new Module();
+
+    model.User = (function () {
+        function User() {
+            this.unlockedStages = [true, true, true, true, true, true];
+        }
+
+        User.prototype.unlockStageAt = function(index) {
+            this.unlockedStages[index] = true;
+        }
+
+        User.prototype.hasUnlockedStageAt = function(index) {
+            return this.unlockedStages[index] || false;
+        }
+
+        return User;
+    })();
+
+    return model;
+})();
+
 window.onload = function onWindowLoaded () {
     enchant();
 
     var game = new Game(640, 960);
     game.fps = 60;
     var logger = new jam.Logger({console: console});
-    var app = new jam.Application({game: game, logger: logger});
+    var user = new model.User();
+    var app = new jam.Application({game: game, logger: logger, user: user});
     var topLevel = new jam.Level({
         name: 'top',
         preload: function (context) {
@@ -171,6 +196,7 @@ window.onload = function onWindowLoaded () {
             stageImagePaths.forEach(function (path) {
                context.game.preload(path);
             });
+            context.game.preload('img/lock.gif');
         },
         load: function (context, params) {
             var app = context.app;
@@ -230,7 +256,6 @@ window.onload = function onWindowLoaded () {
                 touchArea.width = w;
                 touchArea.height = h;
                 touchArea.opacity = 0.8;
-                touchArea.touchEnabled = true;
                 touchArea.backgroundColor = touchAreaBackgroundColor;
 
                 group.addChild(background);
@@ -238,38 +263,53 @@ window.onload = function onWindowLoaded () {
                 group.addChild(charaLabel);
                 group.addChild(categoryLabel);
 
-                group.addEventListener('touchstart', function (e) {
-                    function flashOn () {
-                        touchArea.backgroundColor = scene.backgroundColor;
-                    }
-                    function flashOff () {
-                        touchArea.backgroundColor = touchAreaBackgroundColor;
-                    }
-                    group.tl
-                        .delay(5).then(flashOn).delay(5).then(flashOff)
-                        .delay(5).then(flashOn).delay(5).then(flashOff)
-                        .delay(5).then(flashOn).delay(5).then(flashOff)
-                        .then(function () {
-                            overlay.tl
-                                .tween({ opacity: 1, time: 30 }, enchant.Easing.EXPO_EASEOUT)
-                                .then(function () {
-                                    touchArea.backgroundColor = colors[(i % colors.length)];
-                                    var stage = window.assets.stages[i];
-                                    var stageWithImagePath = {};
-                                    for (var name in stage) {
-                                        if (stage.hasOwnProperty(name)) {
-                                            stageWithImagePath[name] = stage[name];
+                if (context.user.hasUnlockedStageAt(i)) {
+                    group.addEventListener('touchstart', function (e) {
+                        function flashOn () {
+                            touchArea.backgroundColor = scene.backgroundColor;
+                        }
+                        function flashOff () {
+                            touchArea.backgroundColor = touchAreaBackgroundColor;
+                        }
+                        group.tl
+                            .delay(5).then(flashOn).delay(5).then(flashOff)
+                            .delay(5).then(flashOn).delay(5).then(flashOff)
+                            .delay(5).then(flashOn).delay(5).then(flashOff)
+                            .then(function () {
+                                overlay.tl
+                                    .tween({ opacity: 1, time: 30 }, enchant.Easing.EXPO_EASEOUT)
+                                    .then(function () {
+                                        touchArea.backgroundColor = colors[(i % colors.length)];
+                                        var stage = window.assets.stages[i];
+                                        var stageWithImagePath = {};
+                                        for (var name in stage) {
+                                            if (stage.hasOwnProperty(name)) {
+                                                stageWithImagePath[name] = stage[name];
+                                            }
                                         }
-                                    }
-                                    stageWithImagePath.imagePath = stageImagePaths[i];
-                                    app.loadLevel('prologue', { stage: stageWithImagePath })
+                                        stageWithImagePath.imagePath = stageImagePaths[i];
+                                        app.loadLevel('prologue', { stage: stageWithImagePath })
 
-                                });
-                        });
-                });
+                                    });
+                            });
+                    });
+                } else {
+                    var lockSprite = new Sprite();
+                    lockSprite.width = 462;
+                    lockSprite.height = 281;
+                    lockSprite.opacity = 0.95;
+                    lockSprite.scaleX = 1 / (462.0 / w);
+                    lockSprite.scaleY = 1 / (281.0 / h);
+                    lockSprite.originX = 0;
+                    lockSprite.originY = 0;
+                    lockSprite.image = game.assets['img/lock.gif']
 
-                group.addEventListener('touchend', function (e) {
-                });
+                    var lockGroup = new Group();
+                    lockGroup.addChild(lockSprite);
+
+                    group.addChild(lockGroup);
+                }
+
 
                 scene.addChild(group);
                 scene.addChild(overlay);
