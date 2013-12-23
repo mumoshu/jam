@@ -456,6 +456,7 @@ window.onload = function onWindowLoaded () {
             context.app.log('Preloading level...');
             context.game.preload('img/roulette_button.png');
             context.game.preload('img/roulette_button_pressed.png');
+            context.game.preload('img/quiz_choice_box.png');
         },
         load: function (context, params) {
             var app = context.app;
@@ -589,7 +590,7 @@ window.onload = function onWindowLoaded () {
             var loadQuiz = function(quiz) {
                 l_quiz.text = quiz.text;
                 quiz.choices.forEach(function(choice, i) {
-                    btn_choice.list[i].text = choice;
+                    btn_choice.list[i].label.text = choice;
                 });
             };
 
@@ -626,17 +627,48 @@ window.onload = function onWindowLoaded () {
 
             var scene = (function () {
                 for ( i = 0; i < 4; i++ ) {
-                    var btn = new Button('select'+i, 'light');
+                    var btn = (function () {
+                        var width = btn_choice.size[0];
+                        var height = btn_choice.size[1];
+                        var padding = 20;
 
-                    btn.index = i;
-                    btn.font = btn_choice.font;
-                    btn.width = btn_choice.size[0];
-                    btn.height = btn_choice.size[1];
-                    btn.addEventListener('touchend', function(evt) {
-                        judgeChoice(evt.target.index);
-                    });
+                        var btn = new Group();
 
-                    btn.moveTo(pos_list[i][0], pos_list[i][1]);
+                        btn.index = i;
+                        btn.width = width;
+                        btn.height = height;
+                        btn.addEventListener('touchend', function(evt) {
+                            judgeChoice(evt.target.index);
+                        });
+
+                        var imageWidth = 652.0;
+                        var imageHeight = 314.0;
+                        var fixScale = 1.1;
+                        var sprite = new Sprite();
+                        sprite.width = imageWidth;
+                        sprite.height = imageHeight;
+                        sprite.scaleX = 1 / (imageWidth / width) * fixScale;
+                        sprite.scaleY = 1 / (imageHeight / height) * fixScale;
+                        sprite.originX = 0;
+                        sprite.originY = 0;
+                        sprite.image = game.assets['img/quiz_choice_box.png'];
+
+                        var label = new Label();
+                        label.x = padding;
+                        label.y = padding;
+                        label.width = width;
+                        label.height = height;
+                        label.font = btn_choice.font;
+
+                        btn.label = label;
+
+                        btn.addChild(sprite);
+                        btn.addChild(label);
+
+                        btn.moveTo(pos_list[i][0], pos_list[i][1]);
+
+                        return btn;
+                    })();
                     btn_choice.list.push(btn);
                 }
 
