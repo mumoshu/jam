@@ -423,32 +423,18 @@ window.onload = function onWindowLoaded () {
             context.app.log('Preloading level...');
         },
         load: function (context, params) {
-            var game = context.game;
             var app = context.app;
-
             app.log("params=", params, "context=", context);
 
+            var game = context.game;
+            var stage = params.stage;
+
+            var sceneBackground = new Sprite();
+            sceneBackground.image = game.assets[stage.imagePath];
+            sceneBackground.width = game.width;
+            sceneBackground.height = game.height;
+
             var scene = (function () {
-                // ダミークイズデータ
-                var dummies = [
-                    {
-                        "text": "先輩に呼ばれたときの返事で適切なのは？",
-                        "choices": ['はい', 'え？', 'うん', 'なに？'],
-                        "correct_choice": 'はい',
-                        "correct_choice_index": 0
-                    },
-                    {
-                        "text": "任された仕事が終わった時、正しいのは？",
-                        "choices": [
-                            '終わっても報告しない',
-                            'さっさと次の仕事に取り組む',
-                            'すぐに報告する',
-                            '同僚に自慢する'
-                        ],
-                        "correct_choice": 'すぐに報告する',
-                        "correct_choice_index": 2
-                    },
-                ];
                 var num = 10;
                 var scene = new Scene();
                 var pos_list = [
@@ -464,14 +450,12 @@ window.onload = function onWindowLoaded () {
 
                 // Entity
                 var l_quiz;
-                var spr_character;
                 var btn_choice = {
                     list: [],
                     size: [280, 110],
                     font: '32px/48px serif',
                 };
 
-                var stage = params.stage;
                 var stage_quizzes = stage.quizzes;
                 var quizzes;
 
@@ -520,12 +504,6 @@ window.onload = function onWindowLoaded () {
                     l_quiz.font = '32px serif';
                     l_quiz.moveTo(18, 505);
 
-                    spr_character = new Entity();
-                    spr_character.width = 420;
-                    spr_character.height = 420;
-                    spr_character.backgroundColor = 'blue';
-                    spr_character.moveTo(18, 70);
-
                     btn_kobi = new Button('こび', 'light');
                     btn_kobi.width = 150;
                     btn_kobi.height = 150;
@@ -551,11 +529,11 @@ window.onload = function onWindowLoaded () {
 
                     // 画面への追加
                     scene.addChild(l_quiz);
-                    scene.addChild(spr_character);
                     scene.addChild(btn_kobi);
                     btn_choice.list.forEach(function (btn) {
                         scene.addChild(btn);
                     });
+                    scene.addChild(sceneBackground);
 
                     quizzes = choiceQuizzes(stage_quizzes, num);
                     loadQuiz(quizzes[pointer]);
