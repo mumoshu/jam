@@ -497,6 +497,7 @@ window.onload = function onWindowLoaded () {
 
             var game = context.game;
             var stage = params.stage;
+            var lifePoints = params.obj && params.obj.lifePoints || 5;
 
             var num = 10;
             var pointer = 0;
@@ -608,7 +609,7 @@ window.onload = function onWindowLoaded () {
                     if (!playedRouletteOnce) {
                         updateRouletteButton({pressed: false});
                         // 現在の状況を渡す
-                        app.loadLevel('playRoulette', { stage: stage, obj: { quizzes: quizzes, pointer: pointer, playedRouletteOnce: true } });
+                        app.loadLevel('playRoulette', { stage: stage, obj: { quizzes: quizzes, pointer: pointer, playedRouletteOnce: true, lifePoints: lifePoints } });
                         playedRouletteOnce = true;
                     }
                 });
@@ -833,6 +834,14 @@ window.onload = function onWindowLoaded () {
             var showJudgeResult = function(is_correct) {
                 var judge = is_correct ? '正解' : '不正解';
 
+                if (!is_correct) {
+                    lifePoints --;
+
+                    if (lifePoints < 1) {
+                        app.loadLevel('getFired', { stage: stage });
+                    }
+                }
+
                 if (is_correct) {
                     praiseController.showPraise(function () {
                         praiseController.hidePraise(function () {
@@ -860,7 +869,7 @@ window.onload = function onWindowLoaded () {
                     return ;
                 }
 
-                app.loadLevel('selectStage', { stage: stage });
+                app.loadLevel('finishStage', { stage: stage });
             };
 
             var scene = (function () {
@@ -1004,7 +1013,7 @@ window.onload = function onWindowLoaded () {
 
                     roulette.tl.delay(100);
                     roulette.tl.then(function () {
-                        app.loadLevel('playStage', { stage: stage, obj: params.obj, fromRoulette: true });
+                        app.loadLevel('playStage', { stage: stage, obj: params.obj, fromRoulette: true, lifePoints: params.obj.lifePoints + earnedLifePoints });
                     });
                 });
             });
@@ -1103,7 +1112,7 @@ window.onload = function onWindowLoaded () {
                     background.tl
                         .fadeOut(50)
                         .then(function () {
-                            app.loadLevel('top', { stage: stage });
+                            app.loadLevel('top', {});
                         });
 
                     return;
@@ -1283,7 +1292,7 @@ window.onload = function onWindowLoaded () {
                 .rotateBy(-40, 5)
                 .rotateBy(20, 5);
 
-            background.addEventListener('touchstart', function () {
+            speech.addEventListener('touchstart', function () {
                 background.tl
                     .fadeOut(200)
                     .then(function () {
@@ -1313,5 +1322,5 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(gauges);
     app.registerLevel(getFired);
 
-    app.loadLevel('playStage', { stage: window.assets.stages[0] });
+    app.loadLevel('top', { stage: window.assets.stages[0] });
 };
