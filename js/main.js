@@ -448,6 +448,24 @@ window.onload = function onWindowLoaded () {
         }
     });
 
+    var praiseImages = [
+        {
+            path: 'img/praise_0.png',
+            width: 354,
+            height: 148
+        },
+        {
+            path: 'img/praise_1.png',
+            width: 225,
+            height: 237
+        },
+        {
+            path: 'img/praise_2.png',
+            width: 530,
+            height: 161
+        }
+    ];
+
     // クイズ画面
     var playStage = new jam.Level({
         name: "playStage",
@@ -458,6 +476,10 @@ window.onload = function onWindowLoaded () {
             context.game.preload('img/roulette_button_pressed.png');
             context.game.preload('img/quiz_choice_box.png');
             context.game.preload('img/quiz_text_box.png');
+            context.game.preload('img/praise_character.png');
+            praiseImages.forEach(function (image) {
+                context.game.preload(image.path);
+            });
         },
         load: function (context, params) {
             var app = context.app;
@@ -588,6 +610,81 @@ window.onload = function onWindowLoaded () {
                 return rouletteButton;
             })();
 
+            var praiseSprites = [];
+            praiseImages.forEach(function (image) {
+                var sprite = new Sprite();
+                sprite.image = game.assets[image.path];
+                sprite.width = image.width;
+                sprite.height = image.height;
+                praiseSprites.push(sprite);
+            });
+
+            var praiseCharacterSprite = new Sprite();
+            praiseCharacterSprite.image = game.assets['img/praise_character.png'];
+            praiseCharacterSprite.width = 640;
+            praiseCharacterSprite.height = 960;
+
+            var praiseBackground = new Sprite();
+            praiseBackground.width = 640;
+            praiseBackground.height = 960;
+            praiseBackground.backgroundColor = '#eeeeee';
+            praiseBackground.opacity = 0.5;
+
+            var praiseGroup = new Group();
+            praiseGroup.width = 640;
+            praiseGroup.height = 960;
+
+            praiseGroup.addChild(praiseBackground);
+            praiseGroup.addChild(praiseCharacterSprite);
+            praiseGroup.addChild(praiseSprites[0]);
+            praiseGroup.addChild(praiseSprites[1]);
+            praiseGroup.addChild(praiseSprites[2]);
+
+            praiseBackground.tl
+                .fadeOut(0);
+            praiseCharacterSprite.tl
+                .fadeOut(0);
+            praiseImages.forEach(function(image, i) {
+                praiseSprites[i].tl
+                    .fadeOut(0);
+            });
+
+            var currentPraiseSpriteIndex;
+
+            function showPraise(callback) {
+                scene.addChild(praiseGroup);
+                currentPraiseSpriteIndex = Math.floor(Math.random() * praiseImages.length);
+                var delay = 30;
+                var animationTime = 5;
+                praiseBackground.tl
+                    .delay(delay)
+                    .fadeIn(animationTime);
+                praiseCharacterSprite.tl
+                    .delay(delay)
+                    .fadeIn(animationTime);
+                praiseSprites[currentPraiseSpriteIndex].tl
+                    .delay(delay)
+                    .fadeIn(animationTime)
+                    .then(callback);
+            }
+
+            function hidePraise(callback) {
+                var animationTime = 30;
+                praiseBackground.tl
+                    .fadeOut(animationTime)
+                    .hide();
+                praiseCharacterSprite.tl
+                    .fadeOut(animationTime)
+                    .hide();
+                praiseSprites[currentPraiseSpriteIndex].tl
+                    .fadeOut(animationTime)
+                    .then(function () {
+                        scene.removeChild(praiseGroup);
+                    })
+                    .hide()
+                    .then(callback);
+            }
+
             // クイズデータを無作為に作成
             var choiceQuizzes = function (quizzes, num) {
                if (quizzes.length < num) {
@@ -634,7 +731,19 @@ window.onload = function onWindowLoaded () {
             var showJudgeResult = function(is_correct) {
                 var judge = is_correct ? '正解' : '不正解';
 
-                fetchNext();
+                if (is_correct) {
+                    showPraise(function () {
+                        hidePraise(function () {
+                            fetchNext();
+                        })
+                    });
+                } else {
+                    showPraise(function () {
+                        hidePraise(function () {
+                            fetchNext();
+                        })
+                    });
+                }
             };
 
             // 次を取得
@@ -702,6 +811,7 @@ window.onload = function onWindowLoaded () {
                 scene.addChild(sceneBackground);
                 scene.addChild(quizTextBox);
                 scene.addChild(rouletteButton);
+
                 btn_choice.list.forEach(function (btn) {
                     scene.addChild(btn);
                 });
