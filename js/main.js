@@ -846,6 +846,7 @@ window.onload = function onWindowLoaded () {
         name: "getFired",
         preload: function (context) {
             context.game.preload('img/get_fired.png');
+            context.game.preload('img/get_fired_background.png');
         },
         load: function (context, params) {
             var game = context.game;
@@ -854,26 +855,32 @@ window.onload = function onWindowLoaded () {
             var scene = new Scene();
 
             var background = new Sprite();
-            background.image = game.assets['img/get_fired.png'];
+            background.image = game.assets['img/get_fired_background.png'];
             background.width = game.width;
             background.height = game.height;
 
-            var speech = new Label("お前はクビだ！");
-            speech.y = 640;
-            speech.width = 640;
-            speech.height = 320;
-            speech.textAlign = 'center';
-            speech.font = "bold 60pt sans";
-            speech.color = "#ff0000";
+            var speech = new Sprite();
+            speech.x = 170;
+            speech.y = 250;
+            speech.width = 304;
+            speech.height = 450;
+            speech.scaleX = 2.5;
+            speech.scaleY = 2.5;
+            speech.opacity = 1.0;
+            speech.image = game.assets['img/get_fired.png'];
 
             speech.tl
+                .hide()
+                .delay(60)
+                .show()
                 .scaleTo(8, 8)
-                .scaleTo(1, 1, 6)
+                .scaleTo(2.1, 2.1, 6)
                 .rotateBy(10, 5)
                 .rotateBy(-20, 5)
                 .rotateBy(10, 5);
 
             background.tl
+                .delay(60)
                 .rotateBy(20, 5)
                 .rotateBy(-40, 5)
                 .rotateBy(20, 5);
