@@ -272,30 +272,32 @@ window.onload = function onWindowLoaded () {
                 group.addChild(charaLabel);
                 group.addChild(categoryLabel);
 
-                if (context.user.hasUnlockedStageAt(i)) {
-                    group.addEventListener('touchstart', function (e) {
-                        function flashOn () {
-                            touchArea.backgroundColor = scene.backgroundColor;
-                        }
-                        function flashOff () {
-                            touchArea.backgroundColor = touchAreaBackgroundColor;
-                        }
-                        game.assets['audio/common_se_button.mp3'].play();
-                        group.tl
-                            .delay(5).then(flashOn).delay(5).then(flashOff)
-                            .delay(5).then(flashOn).delay(5).then(flashOff)
-                            .delay(5).then(flashOn).delay(5).then(flashOff)
-                            .then(function () {
-                                overlay.tl
-                                    .tween({ opacity: 1, time: 30 }, enchant.Easing.EXPO_EASEOUT)
-                                    .then(function () {
-                                        touchArea.backgroundColor = colors[(i % colors.length)];
-                                        var stage = window.assets.stages[i];
-                                        app.loadLevel('prologue', { stage: stage })
+                group.addEventListener('touchstart', function (e) {
+                    function flashOn () {
+                        touchArea.backgroundColor = scene.backgroundColor;
+                    }
+                    function flashOff () {
+                        touchArea.backgroundColor = touchAreaBackgroundColor;
+                    }
+                    game.assets['audio/common_se_button.mp3'].play();
+                    group.tl
+                        .delay(5).then(flashOn).delay(5).then(flashOff)
+                        .delay(5).then(flashOn).delay(5).then(flashOff)
+                        .delay(5).then(flashOn).delay(5).then(flashOff)
+                        .then(function () {
+                            overlay.tl
+                                .tween({ opacity: 1, time: 30 }, enchant.Easing.EXPO_EASEOUT)
+                                .then(function () {
+                                    touchArea.backgroundColor = colors[(i % colors.length)];
+                                    var stage = window.assets.stages[i];
+                                    app.loadLevel('prologue', { stage: stage })
 
-                                    });
-                            });
-                    });
+                                });
+                        });
+                });
+
+                if (context.user.hasUnlockedStageAt(i)) {
+
                 } else {
                     var lockSprite = new Sprite();
                     lockSprite.width = 462;
@@ -306,6 +308,13 @@ window.onload = function onWindowLoaded () {
                     lockSprite.originX = 0;
                     lockSprite.originY = 0;
                     lockSprite.image = game.assets['img/lock.gif']
+
+                    lockSprite.tl
+                        .delay(120)
+                        .fadeOut(180)
+                        .then(function () {
+                            group.removeChild(lockGroup)
+                        });
 
                     var lockGroup = new Group();
                     lockGroup.addChild(lockSprite);
