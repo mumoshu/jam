@@ -106,22 +106,21 @@ window.onload = function onWindowLoaded () {
         load: function (context, params) {
             var game = context.game;
             var app = context.app;
-
             app.log("params=", params, "context=", context);
-            app.log(this);
+
+            var scene = new Scene();
+            var background = new Sprite();
+            background.image = game.assets['img/top_background.png'];
+            background.width = game.width;
+            background.height = game.height;
+
+            var listButton = new Sprite();
+            listButton.image = game.assets['img/top_list_button.png'];
+            listButton.width = 637;
+            listButton.height = 346;
+            listButton.y = 500;
 
             var scene = (function () {
-                var background = new Sprite();
-                background.image = game.assets['img/top_background.png'];
-                background.width = game.width;
-                background.height = game.height;
-
-                var listButton = new Sprite();
-                listButton.image = game.assets['img/top_list_button.png'];
-                listButton.width = 637
-                listButton.height = 346;
-                listButton.y = 500;
-
                 listButton.tl
                     .hide()
                     .and()
@@ -151,7 +150,6 @@ window.onload = function onWindowLoaded () {
                 listButton.addEventListener('touchend', function () {
                 });
 
-                var scene = new Scene();
                 scene.addChild(background);
                 scene.addChild(listButton);
 
@@ -207,6 +205,8 @@ window.onload = function onWindowLoaded () {
                context.game.preload(path);
             });
             context.game.preload('img/lock.gif');
+            context.game.preload('audio/op_bgm.mp3');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var app = context.app;
@@ -281,6 +281,7 @@ window.onload = function onWindowLoaded () {
                         function flashOff () {
                             touchArea.backgroundColor = touchAreaBackgroundColor;
                         }
+                        game.assets['audio/common_se_button.mp3'].play();
                         group.tl
                             .delay(5).then(flashOn).delay(5).then(flashOff)
                             .delay(5).then(flashOn).delay(5).then(flashOff)
@@ -336,6 +337,7 @@ window.onload = function onWindowLoaded () {
         name: "prologue",
         preload: function (context) {
             context.game.preload('img/prologue_dialogue_box.png');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var game = context.game;
@@ -375,6 +377,7 @@ window.onload = function onWindowLoaded () {
 
             var i = 0;
             function tick() {
+                game.assets['audio/common_se_button.mp3'].play();
                 if (i >= stage.prologueNarration.length) {
                     messageLabel.tl
                         .fadeOut(50)
