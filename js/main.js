@@ -353,19 +353,20 @@ window.onload = function onWindowLoaded () {
             messageLabelSurface.context.textBaseline = "top";
 
             var i = 0;
-            var interval = window.setInterval(function () {
+            function tick() {
                 if (i >= stage.prologueNarration.length) {
-                    window.clearInterval(interval);
-
                     messageLabel.tl
-                        .delay(100)
-                        .fadeOut(100);
+                        .fadeOut(50)
+                        .and()
+                        .scaleTo(5, 5, 50)
                     dialogueBoxBackground.tl
-                        .delay(100)
-                        .fadeOut(100);
-                    sceneBackground.tl
-                        .delay(100)
                         .fadeOut(100)
+                        .and()
+                        .scaleTo(5, 5, 50);
+                    sceneBackground.tl
+                        .fadeOut(50)
+                        .and()
+                        .scaleTo(5, 5, 50)
                         .then(function () {
                             app.loadLevel('playStage', { stage: stage });
                         });
@@ -390,8 +391,7 @@ window.onload = function onWindowLoaded () {
                     .moveBy(0, - 2 * i, 5)
 
                 i++;
-            }, 800);
-
+            }
 
             var messageLabel = new Sprite();
             messageLabel.width = messageLabelWidth;
@@ -405,7 +405,7 @@ window.onload = function onWindowLoaded () {
             scene.addChild(dialogueBox);
 
             scene.addEventListener('touchstart', function () {
-                app.loadLevel('playStage', { stage: stage });
+                tick();
             });
 
             return { scene: scene };
