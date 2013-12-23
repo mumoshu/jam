@@ -408,6 +408,8 @@ window.onload = function onWindowLoaded () {
                 tick();
             });
 
+            tick();
+
             return { scene: scene };
         },
         unload: function (context) {
