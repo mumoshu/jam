@@ -94,32 +94,33 @@ window.onload = function onWindowLoaded () {
     var app = new jam.Application({game: game, logger: logger, user: user});
     var topLevel = new jam.Level({
         name: 'top',
+        bgm: null,
         preload: function (context) {
             context.app.log(context.game);
             context.app.log("Preloading topLevel...");
-            context.game.preload('img/mikoto.png');
             context.game.preload('img/top_background.png');
             context.game.preload('img/top_list_button.png');
-            context.game.preload('img/mikoto.png');
+            context.game.preload('audio/op_bgm.mp3');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var game = context.game;
             var app = context.app;
-
             app.log("params=", params, "context=", context);
 
+            var scene = new Scene();
+            var background = new Sprite();
+            background.image = game.assets['img/top_background.png'];
+            background.width = game.width;
+            background.height = game.height;
+
+            var listButton = new Sprite();
+            listButton.image = game.assets['img/top_list_button.png'];
+            listButton.width = 637;
+            listButton.height = 346;
+            listButton.y = 500;
+
             var scene = (function () {
-                var background = new Sprite();
-                background.image = game.assets['img/top_background.png'];
-                background.width = game.width;
-                background.height = game.height;
-
-                var listButton = new Sprite();
-                listButton.image = game.assets['img/top_list_button.png'];
-                listButton.width = 637
-                listButton.height = 346;
-                listButton.y = 500;
-
                 listButton.tl
                     .hide()
                     .and()
@@ -131,6 +132,7 @@ window.onload = function onWindowLoaded () {
                 listButton.addEventListener('touchstart', function () {
                     app.log(window);
 
+                    game.assets['audio/common_se_button.mp3'].play();
                     listButton.tl
                         .fadeOut(5)
                         .fadeIn(5)
@@ -148,7 +150,6 @@ window.onload = function onWindowLoaded () {
                 listButton.addEventListener('touchend', function () {
                 });
 
-                var scene = new Scene();
                 scene.addChild(background);
                 scene.addChild(listButton);
 
@@ -162,6 +163,8 @@ window.onload = function onWindowLoaded () {
                 if (frameCount % 100 == 0) {
                     context.app.log(frameCount + " frames has passed until now.");
                 }
+
+                game.assets['audio/op_bgm.mp3'].play();
             };
             game.addEventListener('enterframe', this.onEnterFrame);
 
@@ -171,30 +174,6 @@ window.onload = function onWindowLoaded () {
             var game = context.game;
             game.removeEventListener('enterframe', this.onEnterFrame);
             this.onEnterFrame = null;
-        }
-    });
-
-    var levelTwo = new jam.Level({
-        name: "two",
-        load: function (context, params) {
-            var scene = new Scene();
-            
-            var label = new Label("Level 2: params=" + params);
-            label.x = 32;
-            label.y = 32;
-            
-            var ball = new Sprite(50, 50);
-            var surface = new Surface(50, 50);
-            surface.context.beginPath();
-            surface.context.arc(25, 25, 25, 0, Math.PI*2, true);
-            surface.context.fill();
-            ball.image = surface;
-            
-            scene.addChild(label);
-            scene.addChild(ball);
-            return { scene: scene };
-        },
-        unload: function (context, params) {
         }
     });
 
@@ -225,6 +204,8 @@ window.onload = function onWindowLoaded () {
                context.game.preload(path);
             });
             context.game.preload('img/lock.gif');
+            context.game.preload('audio/op_bgm.mp3');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var app = context.app;
@@ -299,6 +280,7 @@ window.onload = function onWindowLoaded () {
                         function flashOff () {
                             touchArea.backgroundColor = touchAreaBackgroundColor;
                         }
+                        game.assets['audio/common_se_button.mp3'].play();
                         group.tl
                             .delay(5).then(flashOn).delay(5).then(flashOff)
                             .delay(5).then(flashOn).delay(5).then(flashOff)
@@ -336,10 +318,18 @@ window.onload = function onWindowLoaded () {
                 scene.addChild(overlay);
             });
 
+            var frameCount = 0;
+            this.onEnterFrame = function () {
+                game.assets['audio/op_bgm.mp3'].play();
+            };
+            game.addEventListener('enterframe', this.onEnterFrame);
             return { scene: scene };
         },
         unload: function (context) {
-
+            var game = context.game;
+            game.removeEventListener('enterframe', this.onEnterFrame);
+            game.assets['audio/op_bgm.mp3'].stop();
+            this.onEnterFrame = null;
         }
     });
 
@@ -347,6 +337,7 @@ window.onload = function onWindowLoaded () {
         name: "prologue",
         preload: function (context) {
             context.game.preload('img/prologue_dialogue_box.png');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var game = context.game;
@@ -386,6 +377,7 @@ window.onload = function onWindowLoaded () {
 
             var i = 0;
             function tick() {
+                game.assets['audio/common_se_button.mp3'].play();
                 if (i >= stage.prologueNarration.length) {
                     messageLabel.tl
                         .fadeOut(50)
@@ -497,6 +489,7 @@ window.onload = function onWindowLoaded () {
             blameImages.forEach(function (image) {
                 context.game.preload(image.path);
             });
+            context.game.preload('audio/quiz_bgm.mp3');
         },
         load: function (context, params) {
             var app = context.app;
@@ -936,9 +929,11 @@ window.onload = function onWindowLoaded () {
             }
 
             loadQuiz(quizzes[pointer]);
+            game.assets['audio/quiz_bgm.mp3'].play();
             return { scene: scene };
         },
         unload: function (context) {
+            game.assets['audio/quiz_bgm.mp3'].stop();
         }
     });
 
@@ -1249,6 +1244,7 @@ window.onload = function onWindowLoaded () {
         preload: function (context) {
             context.game.preload('img/get_fired.png');
             context.game.preload('img/get_fired_background.png');
+            context.game.preload('audio/game_over_se.mp3');
         },
         load: function (context, params) {
             var game = context.game;
@@ -1298,15 +1294,16 @@ window.onload = function onWindowLoaded () {
             scene.addChild(background);
             scene.addChild(speech);
 
+            game.assets['audio/game_over_se.mp3'].play();
+
             return { scene: scene };
         },
         unload: function (context) {
-
+            game.assets['audio/game_over_se.mp3'].play();
         }
     });
 
     app.registerLevel(topLevel);
-    app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
     app.registerLevel(prologue);
     app.registerLevel(playStage);
