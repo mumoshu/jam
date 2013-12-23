@@ -94,19 +94,21 @@ window.onload = function onWindowLoaded () {
     var app = new jam.Application({game: game, logger: logger, user: user});
     var topLevel = new jam.Level({
         name: 'top',
+        bgm: null,
         preload: function (context) {
             context.app.log(context.game);
             context.app.log("Preloading topLevel...");
-            context.game.preload('img/mikoto.png');
             context.game.preload('img/top_background.png');
             context.game.preload('img/top_list_button.png');
-            context.game.preload('img/mikoto.png');
+            context.game.preload('audio/op_bgm.mp3');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var game = context.game;
             var app = context.app;
 
             app.log("params=", params, "context=", context);
+            app.log(this);
 
             var scene = (function () {
                 var background = new Sprite();
@@ -131,6 +133,7 @@ window.onload = function onWindowLoaded () {
                 listButton.addEventListener('touchstart', function () {
                     app.log(window);
 
+                    game.assets['audio/common_se_button.mp3'].play();
                     listButton.tl
                         .fadeOut(5)
                         .fadeIn(5)
@@ -162,6 +165,8 @@ window.onload = function onWindowLoaded () {
                 if (frameCount % 100 == 0) {
                     context.app.log(frameCount + " frames has passed until now.");
                 }
+
+                game.assets['audio/op_bgm.mp3'].play();
             };
             game.addEventListener('enterframe', this.onEnterFrame);
 
@@ -170,6 +175,7 @@ window.onload = function onWindowLoaded () {
         unload: function (context) {
             var game = context.game;
             game.removeEventListener('enterframe', this.onEnterFrame);
+            game.assets['audio/op_bgm.mp3'].stop();
             this.onEnterFrame = null;
         }
     });
@@ -461,6 +467,7 @@ window.onload = function onWindowLoaded () {
         preload: function (context) {
             context.app.log(context.game);
             context.app.log('Preloading level...');
+            context.game.preload('audio/quiz_bgm.mp3');
         },
         load: function (context, params) {
             var app = context.app;
@@ -611,9 +618,11 @@ window.onload = function onWindowLoaded () {
             }
 
             loadQuiz(quizzes[pointer]);
+            game.assets['audio/quiz_bgm.mp3'].play();
             return { scene: scene };
         },
         unload: function (context) {
+            game.assets['audio/quiz_bgm.mp3'].stop();
         }
     });
 
