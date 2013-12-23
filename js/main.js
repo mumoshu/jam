@@ -521,7 +521,7 @@ window.onload = function onWindowLoaded () {
                 var timeKeeper = {};
 
                 var trialTime = 120;
-                var timeLeft = params.obj && parmas.obj.timeLeft || trialTime;
+                var timeLeft = params.obj && params.obj.timeLeft || trialTime;
                 var timePoints;
 
                 timeKeeper.elapseTime = function (elapsedTime) {
