@@ -454,6 +454,8 @@ window.onload = function onWindowLoaded () {
         preload: function (context) {
             context.app.log(context.game);
             context.app.log('Preloading level...');
+            context.game.preload('img/roulette_button.png');
+            context.game.preload('img/roulette_button_pressed.png');
         },
         load: function (context, params) {
             var app = context.app;
@@ -497,14 +499,66 @@ window.onload = function onWindowLoaded () {
                 font: '32px/48px serif',
             };
 
-            var btn_kobi = new Button('こび', 'light');
-            btn_kobi.width = 150;
-            btn_kobi.height = 150;
-            btn_kobi.moveTo(455, 505);
-            btn_kobi.addEventListener('touchstart', function () {
-                // 現在の状況を渡す
-                app.loadLevel('playRoulette', { stage: stage, obj: { quizzes: quizzes, pointer: pointer } });
-            });
+            var rouletteButton = (function() {
+                var rouletteButtonX = 450;
+                var rouletteButtonY = 510;
+                var rouletteButtonWidth = 120;
+                var rouletteButtonHeight = 120;
+                var rouletteButtonScale = 1.5;
+                var playedRouletteOnce = params.obj && params.obj.playedRouletteOnce || false;
+
+                var rouletteButton = new Group();
+
+                rouletteButton.width = rouletteButtonWidth;
+                rouletteButton.height = rouletteButtonHeight;
+                rouletteButton.moveTo(rouletteButtonX, rouletteButtonY);
+                rouletteButton.scaleX = rouletteButtonScale;
+                rouletteButton.scaleY = rouletteButtonScale;
+
+                var rouletteButtonSprite = new Sprite();
+                rouletteButtonSprite.width = rouletteButtonWidth;
+                rouletteButtonSprite.height = rouletteButtonHeight;
+                rouletteButtonSprite.image = game.assets['img/roulette_button.png'];
+                rouletteButtonSprite.scaleX = rouletteButtonScale;
+                rouletteButtonSprite.scaleY = rouletteButtonScale;
+
+                var rouletteButtonPressedSprite = new Sprite();
+                rouletteButtonPressedSprite.width = rouletteButtonWidth;
+                rouletteButtonPressedSprite.height = rouletteButtonHeight;
+                rouletteButtonPressedSprite.image = game.assets['img/roulette_button_pressed.png'];
+                rouletteButtonPressedSprite.scaleX = rouletteButtonScale;
+                rouletteButtonPressedSprite.scaleY = rouletteButtonScale;
+
+                function updateRouletteButton(args) {
+                    if (rouletteButton.firstNode) {
+                        rouletteButton.removeChild(rouletteButton.firstChild);
+                    }
+                    rouletteButton.addChild(args.pressed ? rouletteButtonPressedSprite : rouletteButtonSprite);
+                }
+
+                updateRouletteButton({pressed: false});
+
+                rouletteButton.addEventListener('touchstart', function () {
+                    if (!playedRouletteOnce) {
+                        updateRouletteButton({pressed: true});
+                    }
+                });
+
+                rouletteButton.addEventListener('touchend', function () {
+                    if (!playedRouletteOnce) {
+                        updateRouletteButton({pressed: false});
+                        // 現在の状況を渡す
+                        app.loadLevel('playRoulette', { stage: stage, obj: { quizzes: quizzes, pointer: pointer, playedRouletteOnce: true } });
+                        playedRouletteOnce = true;
+                    }
+                });
+
+                if (playedRouletteOnce) {
+                    updateRouletteButton({pressed: true});
+                }
+
+                return rouletteButton;
+            })();
 
             // クイズデータを無作為に作成
             var choiceQuizzes = function (quizzes, num) {
@@ -588,7 +642,7 @@ window.onload = function onWindowLoaded () {
 
                 scene.addChild(sceneBackground);
                 scene.addChild(l_quiz);
-                scene.addChild(btn_kobi);
+                scene.addChild(rouletteButton);
                 btn_choice.list.forEach(function (btn) {
                     scene.addChild(btn);
                 });
