@@ -180,30 +180,6 @@ window.onload = function onWindowLoaded () {
         }
     });
 
-    var levelTwo = new jam.Level({
-        name: "two",
-        load: function (context, params) {
-            var scene = new Scene();
-            
-            var label = new Label("Level 2: params=" + params);
-            label.x = 32;
-            label.y = 32;
-            
-            var ball = new Sprite(50, 50);
-            var surface = new Surface(50, 50);
-            surface.context.beginPath();
-            surface.context.arc(25, 25, 25, 0, Math.PI*2, true);
-            surface.context.fill();
-            ball.image = surface;
-            
-            scene.addChild(label);
-            scene.addChild(ball);
-            return { scene: scene };
-        },
-        unload: function (context, params) {
-        }
-    });
-
     var template = new jam.Level({
         name: "template",
         preload: function (context) {
@@ -990,7 +966,6 @@ window.onload = function onWindowLoaded () {
     });
 
     app.registerLevel(topLevel);
-    app.registerLevel(levelTwo);
     app.registerLevel(selectStage);
     app.registerLevel(prologue);
     app.registerLevel(playStage);
