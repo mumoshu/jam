@@ -471,6 +471,16 @@ window.onload = function onWindowLoaded () {
         }
     ];
 
+    var lifeImagePaths = [];
+    for (var i=0; i<6; i++) {
+        lifeImagePaths.push('img/life_' + i + '.png');
+    }
+
+    var timeImagePaths = [];
+    for (var i=0; i<9; i++) {
+        timeImagePaths.push('img/time_' + i + '.png');
+    }
+
     // クイズ画面
     var playStage = new jam.Level({
         name: "playStage",
@@ -490,6 +500,12 @@ window.onload = function onWindowLoaded () {
                 context.game.preload(image.path);
             });
             context.game.preload('audio/quiz_bgm.mp3');
+            lifeImagePaths.forEach(function (path) {
+                context.game.preload(path);
+            });
+            timeImagePaths.forEach(function (path) {
+                context.game.preload(path);
+            });
         },
         load: function (context, params) {
             var app = context.app;
@@ -498,6 +514,33 @@ window.onload = function onWindowLoaded () {
             var game = context.game;
             var stage = params.stage;
             var lifePoints = params.obj && params.obj.lifePoints || 5;
+
+            var timeKeeper = (function () {
+                var timeKeeper = {};
+
+                var trialTime = 120;
+                var timeLeft = params.obj && parmas.obj.timeLeft || trialTime;
+                var timePoints;
+
+                timeKeeper.elapseTime = function (elapsedTime) {
+                    timeLeft -= elapsedTime;
+                    timeLeft = Math.max(timeLeft, 0);
+                    timePoints = Math.max(Math.ceil(timeLeft / trialTime * (timeImagePaths.length - 1)), 0);
+                };
+
+                timeKeeper.getTimePoints = function () {
+                    console.log(timePoints);
+                    return timePoints;
+                }
+
+                timeKeeper.timeIsOver = function () {
+                    return ! (timeLeft > 0);
+                }
+
+                timeKeeper.elapseTime(0);
+
+                return timeKeeper;
+            })();
 
             var num = 10;
             var pointer = 0;
@@ -520,6 +563,61 @@ window.onload = function onWindowLoaded () {
             sceneBackground.image = game.assets[stage.imagePath];
             sceneBackground.width = game.width;
             sceneBackground.height = game.height;
+
+            var lifeSprites = [];
+            var timeSprites = [];
+
+            lifeImagePaths.forEach(function (path) {
+                var lifeSprite = new Sprite();
+                lifeSprite.image = game.assets[path];
+                var lifeSpriteWidth = 179;
+                var lifeSpriteHeight = 334;
+                lifeSprite.width = lifeSpriteWidth;
+                lifeSprite.height = lifeSpriteHeight;
+                lifeSprite.scaleX = 0.8;
+                lifeSprite.scaleY = 0.8;
+                lifeSprite.originX = 0;
+                lifeSprite.originY = 0;
+                lifeSprites.push(lifeSprite);
+            });
+            timeImagePaths.forEach(function (path) {
+                var timeSprite = new Sprite();
+                timeSprite.image = game.assets[path];
+                var timeImageWidth = 814;
+                var timeImageHeight = 209;
+                timeSprite.width = timeImageWidth;
+                timeSprite.height = timeImageHeight;
+                timeSprite.scaleX = 0.8;
+                timeSprite.scaleY = 0.8;
+                timeSprite.originX = 0;
+                timeSprite.originY = 0;
+                timeSprites.push(timeSprite);
+            });
+
+            var lifeGroup = new Group();
+            lifeGroup.x = 500;
+            lifeGroup.y = 80;
+            lifeGroup.width = game.width;
+            lifeGroup.height = game.height;
+
+            var timeGroup = new Group();
+            timeGroup.y = - 20;
+            timeGroup.width = game.width;
+            timeGroup.height = game.height;
+
+            var lifeController = new controller.GaugeController({group: lifeGroup, sprites: lifeSprites});
+            var timeController = new controller.GaugeController({group: timeGroup, sprites: timeSprites});
+
+            lifeController.setValue(lifePoints);
+            timeController.setValue(timeKeeper.getTimePoints());
+
+            this.interval = window.setInterval(function () {
+                timeKeeper.elapseTime(1);
+                timeController.setValue(timeKeeper.getTimePoints());
+                if (timeKeeper.timeIsOver()) {
+                    app.loadLevel('getFired', {});
+                }
+            }, 1000);
 
             var quizTextBoxPadding = 30;
             var quizTextBoxWidth = 640 - (quizTextBoxPadding * 2);
@@ -561,11 +659,12 @@ window.onload = function onWindowLoaded () {
             };
 
             var rouletteButton = (function() {
-                var rouletteButtonX = 450;
-                var rouletteButtonY = 100;
+                var rouletteButtonX = 460;
+                var rouletteButtonY = 340;
                 var rouletteButtonWidth = 120;
                 var rouletteButtonHeight = 120;
-                var rouletteButtonScale = 1.5;
+                var rouletteButtonScale = 1.3;
+                var rouletteButtonOpacity = 0.9;
                 var playedRouletteOnce = params.obj && params.obj.playedRouletteOnce || false;
 
                 var rouletteButton = new Group();
@@ -580,6 +679,7 @@ window.onload = function onWindowLoaded () {
                 rouletteButtonSprite.width = rouletteButtonWidth;
                 rouletteButtonSprite.height = rouletteButtonHeight;
                 rouletteButtonSprite.image = game.assets['img/roulette_button.png'];
+                rouletteButtonSprite.opacity = rouletteButtonOpacity;
                 rouletteButtonSprite.scaleX = rouletteButtonScale;
                 rouletteButtonSprite.scaleY = rouletteButtonScale;
 
@@ -587,6 +687,7 @@ window.onload = function onWindowLoaded () {
                 rouletteButtonPressedSprite.width = rouletteButtonWidth;
                 rouletteButtonPressedSprite.height = rouletteButtonHeight;
                 rouletteButtonPressedSprite.image = game.assets['img/roulette_button_pressed.png'];
+                rouletteButtonPressedSprite.opacity = rouletteButtonOpacity;
                 rouletteButtonPressedSprite.scaleX = rouletteButtonScale;
                 rouletteButtonPressedSprite.scaleY = rouletteButtonScale;
 
@@ -837,6 +938,8 @@ window.onload = function onWindowLoaded () {
                 if (!is_correct) {
                     lifePoints --;
 
+                    lifeController.setValue(lifePoints);
+
                     if (lifePoints < 1) {
                         app.loadLevel('getFired', { stage: stage });
                     }
@@ -927,6 +1030,9 @@ window.onload = function onWindowLoaded () {
                     scene.addChild(btn);
                 });
 
+                scene.addChild(lifeGroup);
+                scene.addChild(timeGroup);
+
                 return scene;
             })();
 
@@ -943,6 +1049,7 @@ window.onload = function onWindowLoaded () {
         },
         unload: function (context) {
             game.assets['audio/quiz_bgm.mp3'].stop();
+            window.clearInterval(this.interval);
         }
     });
 
@@ -1171,83 +1278,6 @@ window.onload = function onWindowLoaded () {
         }
     });
 
-    var timeImagePaths = [];
-    var lifeImagePaths = [];
-
-    for (var i=0; i<6; i++) {
-        lifeImagePaths.push('img/life_' + i + '.png');
-    }
-    for (var i=0; i<9; i++) {
-        timeImagePaths.push('img/time_' + i + '.png');
-    }
-
-    var gauges = new jam.Level({
-        name: "gauges",
-        preload: function (context) {
-            lifeImagePaths.forEach(function (path) {
-               context.game.preload(path);
-            });
-            timeImagePaths.forEach(function (path) {
-                context.game.preload(path);
-            });
-        },
-        load: function (context, params) {
-            var game = context.game;
-            var app = context.app;
-
-            var scene = new Scene();
-
-            var lifeSprites = [];
-            var timeSprites = [];
-
-            lifeImagePaths.forEach(function (path) {
-                var lifeSprite = new Sprite();
-                lifeSprite.image = game.assets[path];
-                lifeSprite.width = 179;
-                lifeSprite.height = 334;
-                lifeSprites.push(lifeSprite);
-            });
-            timeImagePaths.forEach(function (path) {
-                var timeSprite = new Sprite();
-                timeSprite.image = game.assets[path];
-                timeSprite.width = 814;
-                timeSprite.height = 209;
-                timeSprites.push(timeSprite);
-            });
-
-            var lifeGroup = new Group();
-            lifeGroup.width = game.width;
-            lifeGroup.height = game.height;
-
-            var timeGroup = new Group();
-            timeGroup.width = game.width;
-            timeGroup.height = game.height;
-
-            var lifeController = new controller.GaugeController({group: lifeGroup, sprites: lifeSprites});
-            var timeController = new controller.GaugeController({group: timeGroup, sprites: timeSprites});
-
-            var elapsedFrame = 0;
-            this.enterFrame = function () {
-                if (elapsedFrame % 30 == 0) {
-                    lifeController.setRandom();
-                    timeController.setRandom();
-                }
-                elapsedFrame ++;
-            };
-
-            game.addEventListener('enterframe', this.enterFrame);
-
-            scene.addChild(lifeGroup);
-            scene.addChild(timeGroup);
-
-            return { scene: scene };
-        },
-        unload: function (context) {
-            context.game.removeEventListener(this.enterFrame);
-            window.clearInterval(this.interval);
-        }
-    });
-
     var getFired = new jam.Level({
         name: "getFired",
         preload: function (context) {
@@ -1319,7 +1349,6 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(playRoulette);
     app.registerLevel(finishStage);
     app.registerLevel(ending);
-    app.registerLevel(gauges);
     app.registerLevel(getFired);
 
     app.loadLevel('top', { stage: window.assets.stages[0] });
