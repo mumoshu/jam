@@ -1020,5 +1020,5 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(gauges);
     app.registerLevel(getFired);
 
-    app.loadLevel('ending', { stage: window.assets.stages[0] });
+    app.loadLevel('top', { stage: window.assets.stages[0] });
 };
