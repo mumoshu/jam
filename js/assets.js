@@ -69,5 +69,14 @@ window.assets = (function () {
         stage.prologueNarration = prologueNarrations[i];
     });
 
+    assets.narration = {};
+    assets.narration.ending = [
+        "ようやくおれの戦いは終わった。",
+        "媚びるということはどういうことか。",
+        "おれと一緒に戦ってくれたあなたならば、",
+        "その意味がなんとなくわかるだろう。",
+        "同士よ、これからも媚び続けよう。"
+    ];
+
     return assets;
 })();

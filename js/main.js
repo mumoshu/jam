@@ -57,6 +57,34 @@ var model = (function () {
 })();
 
 window.onload = function onWindowLoaded () {
+    function wrapText(context, text, x, y, maxWidth, lineHeight, rightMargin) {
+        var cars = text.split("\n");
+
+        for (var ii = 0; ii < cars.length; ii++) {
+
+            var line = "";
+            var words = cars[ii].split("");
+
+            for (var n = 0; n < words.length; n++) {
+                var testLine = line + words[n];
+                var metrics = context.measureText(testLine);
+                var testWidth = metrics.width;
+
+                if (testWidth > maxWidth - rightMargin) {
+                    context.fillText(line, x, y);
+                    line = words[n];
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+            }
+
+            context.fillText(line, x, y);
+            y += lineHeight;
+        }
+    }
+
     enchant();
 
     var game = new Game(640, 960);
@@ -328,35 +356,6 @@ window.onload = function onWindowLoaded () {
             context.game.preload('img/prologue_dialogue_box.png');
         },
         load: function (context, params) {
-
-            function wrapText(context, text, x, y, maxWidth, lineHeight, rightMargin) {
-                var cars = text.split("\n");
-
-                for (var ii = 0; ii < cars.length; ii++) {
-
-                    var line = "";
-                    var words = cars[ii].split("");
-
-                    for (var n = 0; n < words.length; n++) {
-                        var testLine = line + words[n];
-                        var metrics = context.measureText(testLine);
-                        var testWidth = metrics.width;
-
-                        if (testWidth > maxWidth - rightMargin) {
-                            context.fillText(line, x, y);
-                            line = words[n];
-                            y += lineHeight;
-                        }
-                        else {
-                            line = testLine;
-                        }
-                    }
-
-                    context.fillText(line, x, y);
-                    y += lineHeight;
-                }
-            }
-
             var game = context.game;
             var app = context.app;
             var stage = params.stage;
@@ -775,7 +774,8 @@ window.onload = function onWindowLoaded () {
     var ending = new jam.Level({
         name: "ending",
         preload: function (context) {
-            context.game.preload('img/ending.png');
+            context.game.preload('img/conglaturations.png');
+            context.game.preload('img/ending_dialogue_box.png');
         },
         load: function (context, params) {
             var game = context.game;
@@ -783,20 +783,86 @@ window.onload = function onWindowLoaded () {
 
             var scene = new Scene();
 
+            var dialogueBoxWidth = 407;
+            var dialogueBoxHeight = 327;
+
+            var messageLabelWidth = 407;
+            var messageLabelHeight = 327;
+            var messageLabelPadding = 20;
+
             var background = new Sprite();
-            background.image = game.assets['img/ending.png'];
+            background.image = game.assets['img/conglaturations.png'];
             background.width = game.width;
             background.height = game.height;
 
-            background.addEventListener('touchstart', function () {
-                background.tl
-                    .fadeOut(50)
-                    .then(function () {
-                        app.loadLevel('top');
-                    });
+            var messageLabelSurface = new Surface(messageLabelWidth, messageLabelHeight);
+            messageLabelSurface.width = messageLabelWidth;
+            messageLabelSurface.height = messageLabelHeight;
+            messageLabelSurface.context.font = "bold 30pt sans-serif";
+            messageLabelSurface.context.textBaseline = "top";
+
+            var narration = window.assets.narration.ending;
+            var i = 0;
+            function tick() {
+                if (i >= narration.length) {
+                    messageLabel.tl
+                        .fadeOut(50);
+                    dialogueBoxBackground.tl
+                        .fadeOut(50);
+                    background.tl
+                        .fadeOut(50)
+                        .then(function () {
+                            app.loadLevel('top', { stage: stage });
+                        });
+
+                    return;
+                }
+                messageLabelSurface.context.clearRect(0, 0, messageLabelWidth, messageLabelHeight);
+                messageLabelSurface.context.fillStyle = "#eeeeee";
+                wrapText(
+                    messageLabelSurface.context,
+                    narration[i],
+                    messageLabelPadding + 20,
+                    messageLabelPadding + 20,
+                    messageLabelWidth,
+                    50,
+                    50
+                );
+                messageLabel.tl
+                    .moveBy(0, 2 * i, 5)
+                    .moveBy(0, - 4 * i, 5)
+                    .moveBy(0, 4 * i, 5)
+                    .moveBy(0, - 2 * i, 5)
+
+                i++;
+            }
+
+            var messageLabel = new Sprite();
+            messageLabel.width = messageLabelWidth;
+            messageLabel.height = messageLabelHeight;
+            messageLabel.image = messageLabelSurface;
+
+            var dialogueBoxBackground = new Sprite();
+            dialogueBoxBackground.width = dialogueBoxWidth;
+            dialogueBoxBackground.height = dialogueBoxHeight;
+            dialogueBoxBackground.image = game.assets['img/ending_dialogue_box.png'];
+
+            var dialogueBox = new Group();
+            dialogueBox.x = Math.floor((game.width - dialogueBoxWidth) / 2);
+            dialogueBox.y = 590;
+            dialogueBox.width = dialogueBoxWidth;
+            dialogueBox.height = dialogueBoxHeight;
+            dialogueBox.addChild(dialogueBoxBackground);
+            dialogueBox.addChild(messageLabel);
+
+            scene.addEventListener('touchstart', function () {
+                tick();
             });
 
             scene.addChild(background);
+            scene.addChild(dialogueBox);
+
+            tick();
 
             return { scene: scene };
         },
@@ -954,5 +1020,5 @@ window.onload = function onWindowLoaded () {
     app.registerLevel(gauges);
     app.registerLevel(getFired);
 
-    app.loadLevel('top', { stage: window.assets.stages[0] });
+    app.loadLevel('ending', { stage: window.assets.stages[0] });
 };
