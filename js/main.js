@@ -429,154 +429,141 @@ window.onload = function onWindowLoaded () {
             var game = context.game;
             var stage = params.stage;
 
+            var quizzes;
+            var num = 10;
+            var pointer = 0;
+            var scene = new Scene();
+            var pos_list = [
+                [ 15, 720 ],
+                [ 325, 720 ],
+                [ 15, 840 ],
+                [ 325, 840 ]
+            ];
+            var current = {
+                quiz: null,
+                index: null,
+            };
+
+            var stage_quizzes = stage.quizzes;
+
             var sceneBackground = new Sprite();
             sceneBackground.image = game.assets[stage.imagePath];
             sceneBackground.width = game.width;
             sceneBackground.height = game.height;
 
-            var scene = (function () {
-                var num = 10;
-                var scene = new Scene();
-                var pos_list = [
-                    [ 15, 720 ],
-                    [ 325, 720 ],
-                    [ 15, 840 ],
-                    [ 325, 840 ]
-                ];
-                var current = {
-                    quiz: null,
-                    index: null,
-                };
+            var l_quiz = new Label();
+            l_quiz.backgroundColor = '#FFFFFF';
+            l_quiz.width = 420;
+            l_quiz.height = 155;
+            l_quiz.font = '32px serif';
+            l_quiz.moveTo(18, 505);
 
-                // Entity
-                var l_quiz;
-                var btn_choice = {
-                    list: [],
-                    size: [280, 110],
-                    font: '32px/48px serif',
-                };
+            var btn_choice = {
+                list: [],
+                size: [280, 110],
+                font: '32px/48px serif',
+            };
 
-                var stage_quizzes = stage.quizzes;
-                var quizzes;
+            var btn_kobi = new Button('こび', 'light');
+            btn_kobi.width = 150;
+            btn_kobi.height = 150;
+            btn_kobi.moveTo(455, 505);
+                btn_kobi.addEventListener('touchstart', function () {
+                app.loadLevel('playRoulette', { stage: stage });
+            });
 
-                // クイズデータを無作為に作成
-                var choiceQuizzes = function (quizzes, num) {
-                    if (quizzes.length < num) {
-                        return quizzes;
-                    }
-                    var c_quizzes = [];
-                    var history = [];
-                    var cnt = quizzes.length;
-                    var rnd;
+            // クイズデータを無作為に作成
+            var choiceQuizzes = function (quizzes, num) {
+               if (quizzes.length < num) {
+                   return quizzes;
+               }
+               var c_quizzes = [];
+               var history = [];
+               var cnt = quizzes.length;
+               var rnd;
 
-                    for (i = 0; i < num; ) {
-                        rnd = Math.random() * cnt | 0;
+               for (i = 0; i < num; ) {
+                   rnd = Math.random() * cnt | 0;
 
-                        if (history.indexOf(rnd) > -1) {
-                            continue;
-                        }
+                   if (history.indexOf(rnd) > -1) {
+                       continue;
+                   }
 
-                        c_quizzes.push(quizzes[rnd]);
-                        history.push(rnd);
-                        i++;
-                    }
+                   c_quizzes.push(quizzes[rnd]);
+                   history.push(rnd);
+                   i++;
+               }
 
-                    return c_quizzes;
-                };
+               return c_quizzes;
+            };
 
-                // クイズの読み込み
-                var loadQuiz = function(quiz) {
-                    l_quiz.text = quiz.text;
-                    quiz.choices.forEach(function(choice, i) {
-                        btn_choice.list[i].text = choice;
-                    });
-                };
-                // 画面の初期化
-                var initLevel = function() {
-                    // 背景色指定
-                    scene.backgroundColor = '#CCCCCC';
+            // クイズの読み込み
+            var loadQuiz = function(quiz) {
+                l_quiz.text = quiz.text;
+                quiz.choices.forEach(function(choice, i) {
+                    btn_choice.list[i].text = choice;
+                });
+            };
 
-                    // Entity生成
-                    l_quiz = new Label();
-                    l_quiz.backgroundColor = '#FFFFFF';
-                    l_quiz.width = 420;
-                    l_quiz.height = 155;
-                    l_quiz.font = '32px serif';
-                    l_quiz.moveTo(18, 505);
+            // 選択を判定
+            var judgeChoice = function(index) {
+                app.log('choiced: ' + index);
+                app.log(' text: ' + quizzes[pointer].text);
+                app.log(' answer: ' + quizzes[pointer].correct_choice);
+                showJudgeResult(quizzes[pointer].correct_choice_index == index);
+            };
 
-                    btn_kobi = new Button('こび', 'light');
-                    btn_kobi.width = 150;
-                    btn_kobi.height = 150;
-                    btn_kobi.moveTo(455, 505);
-                    btn_kobi.addEventListener('touchstart', function () {
-                        app.loadLevel('playRoulette', { stage: stage });
-                    });
+            // 結果を表示
+            var showJudgeResult = function(is_correct) {
+                var judge = is_correct ? '正解' : '不正解';
+                app.log(judge);
 
-                    for ( i = 0; i < 4; i++ ) {
-                        var btn = new Button('select'+i, 'light');
+                fetchNext();
+            };
 
-                        btn.index = i;
-                        btn.font = btn_choice.font;
-                        btn.width = btn_choice.size[0];
-                        btn.height = btn_choice.size[1];
-                        btn.ontouchend = function(evt) {
-                            judgeChoice(evt.target.index);
-                        }
+            // 次を取得
+            var fetchNext = function() {
+                pointer++;
+                app.log(pointer);
+                app.log(quizzes.length);
 
-                        btn.moveTo(pos_list[i][0], pos_list[i][1]);
-                        btn_choice.list.push(btn);
-                    }
-
-                    // 画面への追加
-                    scene.addChild(l_quiz);
-                    scene.addChild(btn_kobi);
-                    btn_choice.list.forEach(function (btn) {
-                        scene.addChild(btn);
-                    });
-                    scene.addChild(sceneBackground);
-
-                    quizzes = choiceQuizzes(stage_quizzes, num);
+                // 次はあるか
+                if (pointer < quizzes.length) {
                     loadQuiz(quizzes[pointer]);
-                };
+                    return ;
+                }
 
-                // 選択を判定
-                var judgeChoice = function(index) {
-                    app.log('choiced: ' + index);
-                    app.log(' text: ' + quizzes[pointer].text);
-                    app.log(' answer: ' + quizzes[pointer].correct_choice);
-                    showJudgeResult(quizzes[pointer].correct_choice_index == index);
-                };
+                app.loadLevel('selectStage', {});
+            };
 
-                // 結果を表示
-                var showJudgeResult = function(is_correct) {
-                    var judge = is_correct ? '正解' : '不正解';
-                    app.log(judge);
+            var scene = (function () {
+                for ( i = 0; i < 4; i++ ) {
+                    var btn = new Button('select'+i, 'light');
 
-                    fetchNext();
-                };
-
-                // 次を取得
-                var fetchNext = function() {
-                    pointer++;
-                    app.log(pointer);
-                    app.log(quizzes.length);
-
-                    // 次はあるか
-                    if (pointer < quizzes.length) {
-                        loadQuiz(quizzes[pointer]);
-                        return ;
+                    btn.index = i;
+                    btn.font = btn_choice.font;
+                    btn.width = btn_choice.size[0];
+                    btn.height = btn_choice.size[1];
+                    btn.ontouchend = function(evt) {
+                        judgeChoice(evt.target.index);
                     }
 
-                    app.loadLevel('selectStage', {});
-                };
+                    btn.moveTo(pos_list[i][0], pos_list[i][1]);
+                    btn_choice.list.push(btn);
+                }
 
-                // ポインタの初期化
-                var pointer = 0;
-                // ふぁいあー
-                initLevel();
+                scene.addChild(sceneBackground);
+                scene.addChild(l_quiz);
+                scene.addChild(btn_kobi);
+                btn_choice.list.forEach(function (btn) {
+                    scene.addChild(btn);
+                });
+
                 return scene;
             })();
 
+            quizzes = choiceQuizzes(stage_quizzes, num);
+            loadQuiz(quizzes[pointer]);
             return { scene: scene };
         },
         unload: function (context) {
