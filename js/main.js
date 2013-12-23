@@ -173,7 +173,6 @@ window.onload = function onWindowLoaded () {
         unload: function (context) {
             var game = context.game;
             game.removeEventListener('enterframe', this.onEnterFrame);
-            game.assets['audio/op_bgm.mp3'].stop();
             this.onEnterFrame = null;
         }
     });
@@ -326,10 +325,18 @@ window.onload = function onWindowLoaded () {
                 scene.addChild(overlay);
             });
 
+            var frameCount = 0;
+            this.onEnterFrame = function () {
+                game.assets['audio/op_bgm.mp3'].play();
+            };
+            game.addEventListener('enterframe', this.onEnterFrame);
             return { scene: scene };
         },
         unload: function (context) {
-
+            var game = context.game;
+            game.removeEventListener('enterframe', this.onEnterFrame);
+            game.assets['audio/op_bgm.mp3'].stop();
+            this.onEnterFrame = null;
         }
     });
 
@@ -912,6 +919,7 @@ window.onload = function onWindowLoaded () {
         preload: function (context) {
             context.game.preload('img/get_fired.png');
             context.game.preload('img/get_fired_background.png');
+            context.game.preload('audio/game_over_se.mp3');
         },
         load: function (context, params) {
             var game = context.game;
@@ -961,10 +969,12 @@ window.onload = function onWindowLoaded () {
             scene.addChild(background);
             scene.addChild(speech);
 
+            game.assets['audio/game_over_se.mp3'].play();
+
             return { scene: scene };
         },
         unload: function (context) {
-
+            game.assets['audio/game_over_se.mp3'].play();
         }
     });
 
