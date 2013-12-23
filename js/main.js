@@ -377,7 +377,6 @@ window.onload = function onWindowLoaded () {
 
             var i = 0;
             function tick() {
-                game.assets['audio/common_se_button.mp3'].play();
                 if (i >= stage.prologueNarration.length) {
                     messageLabel.tl
                         .fadeOut(50)
@@ -414,6 +413,9 @@ window.onload = function onWindowLoaded () {
                     .moveBy(0, 4 * i, 5)
                     .moveBy(0, - 2 * i, 5)
 
+                if (i > 0) {
+                    game.assets['audio/common_se_button.mp3'].play();
+                }
                 i++;
             }
 
@@ -1183,6 +1185,8 @@ window.onload = function onWindowLoaded () {
         preload: function (context) {
             context.game.preload('img/conglaturations.png');
             context.game.preload('img/ending_dialogue_box.png');
+            context.game.preload('audio/ending_se.mp3');
+            context.game.preload('audio/common_se_button.mp3');
         },
         load: function (context, params) {
             var game = context.game;
@@ -1241,6 +1245,9 @@ window.onload = function onWindowLoaded () {
                     .moveBy(0, 4 * i, 5)
                     .moveBy(0, - 2 * i, 5)
 
+                if (i > 0) {
+                    game.assets['audio/common_se_button.mp3'].play();
+                }
                 i++;
             }
 
@@ -1268,6 +1275,7 @@ window.onload = function onWindowLoaded () {
 
             scene.addChild(background);
             scene.addChild(dialogueBox);
+            game.assets['audio/ending_se.mp3'].play();
 
             tick();
 
