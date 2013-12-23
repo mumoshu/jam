@@ -309,14 +309,7 @@ window.onload = function onWindowLoaded () {
                                     .then(function () {
                                         touchArea.backgroundColor = colors[(i % colors.length)];
                                         var stage = window.assets.stages[i];
-                                        var stageWithImagePath = {};
-                                        for (var name in stage) {
-                                            if (stage.hasOwnProperty(name)) {
-                                                stageWithImagePath[name] = stage[name];
-                                            }
-                                        }
-                                        stageWithImagePath.imagePath = stageImagePaths[i];
-                                        app.loadLevel('prologue', { stage: stageWithImagePath })
+                                        app.loadLevel('prologue', { stage: stage })
 
                                     });
                             });
