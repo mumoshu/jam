@@ -158,15 +158,14 @@ window.onload = function onWindowLoaded () {
 
             var frameCount = 0;
             this.onEnterFrame = function () {
-                frameCount ++;
+                frameCount++;
 
                 if (frameCount % 100 == 0) {
                     context.app.log(frameCount + " frames has passed until now.");
                 }
-
-                game.assets['audio/op_bgm.mp3'].play();
             };
             game.addEventListener('enterframe', this.onEnterFrame);
+            game.assets['audio/op_bgm.mp3'].play();
 
             return { scene: scene };
         },
@@ -329,7 +328,6 @@ window.onload = function onWindowLoaded () {
 
             var frameCount = 0;
             this.onEnterFrame = function () {
-                game.assets['audio/op_bgm.mp3'].play();
             };
             game.addEventListener('enterframe', this.onEnterFrame);
             return { scene: scene };
